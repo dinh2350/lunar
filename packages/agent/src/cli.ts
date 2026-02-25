@@ -1,6 +1,7 @@
 import * as readline from 'readline';
 import type { Message } from './llm/types.js';
 import { runAgent } from './runner.js';
+import { getToolDefinitions } from '../../tools/src/executor.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -73,11 +74,21 @@ function handleCommand(input: string): boolean {
       console.log('🗑️  History cleared\n');
       return true;
     }
+    case '/tools': {
+      const tools = getToolDefinitions();
+      console.log('\nAvailable tools:');
+      for (const tool of tools) {
+        console.log(`  🔧 ${tool.function.name} — ${tool.function.description}`);
+      }
+      console.log('');
+      return true;
+    }
     case '/help': {
       console.log(`
 Commands:
   /temp <0-2>       Set temperature
   /model <name>     Switch model
+  /tools            List available tools
   /history          Show conversation size
   /clear            Clear history
   /help             Show this
