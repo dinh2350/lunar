@@ -4,6 +4,7 @@ import { calculatorTool, executeCalculator } from './calculator.js';
 import { bashTool, executeBash } from './bash.js';
 import { readFileTool, executeReadFile, listDirTool, executeListDir, writeFileTool, executeWriteFile } from './filesystem.js';
 import { memorySearchTool, createMemorySearchExecutor } from './memory-search.js';
+import { memoryWriteTool, createMemoryWriteExecutor } from './memory-write.js';
 import type { VectorStore } from '../../memory/src/store.js';
 
 // Registry: all available tools
@@ -23,11 +24,17 @@ tools.set('write_file', { definition: writeFileTool, execute: executeWriteFile }
 /**
  * Initialize memory-dependent tools. Call once at startup with a VectorStore.
  */
-export function initializeTools(store: VectorStore) {
+export function initializeTools(store: VectorStore, memoryBasePath = './data/workspace') {
   const executeMemorySearch = createMemorySearchExecutor(store);
   tools.set('memory_search', {
     definition: memorySearchTool,
     execute: (args: any) => executeMemorySearch(args).then(r => r.result),
+  });
+
+  const executeMemoryWrite = createMemoryWriteExecutor(store, memoryBasePath);
+  tools.set('memory_write', {
+    definition: memoryWriteTool,
+    execute: (args: any) => executeMemoryWrite(args).then(r => r.result),
   });
 }
 

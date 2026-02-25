@@ -36,6 +36,7 @@ const messages: Message[] = [
 - list_directory: list files in a directory
 - write_file: create or modify files (only when user asks)
 - memory_search: search knowledge base for information
+- memory_write: save important info to memory for future retrieval
 
 Be concise and helpful.`,
   },

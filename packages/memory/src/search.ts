@@ -1,5 +1,5 @@
 import type { VectorStore, SearchResult } from './store.js';
-import { embed } from './embedder.js';
+import { embed, cosineSimilarity } from './embedder.js';
 
 // ============================================
 // Hybrid Search Configuration
@@ -10,6 +10,8 @@ export interface SearchOptions {
   bm25Weight: number;
   limit: number;
   candidateMultiplier: number;
+  halfLifeDays: number;
+  mmrLambda: number;
 }
 
 const DEFAULT_OPTIONS: SearchOptions = {
@@ -17,6 +19,8 @@ const DEFAULT_OPTIONS: SearchOptions = {
   bm25Weight: 0.3,
   limit: 5,
   candidateMultiplier: 3,
+  halfLifeDays: 30,
+  mmrLambda: 0.7,
 };
 
 export interface HybridResult {
@@ -26,10 +30,11 @@ export interface HybridResult {
   combinedScore: number;
   vectorScore: number;
   bm25Score: number;
+  decayFactor?: number;
 }
 
 // ============================================
-// Hybrid Search Function
+// Hybrid Search Function (full pipeline)
 // ============================================
 
 export async function hybridSearch(
@@ -47,11 +52,35 @@ export async function hybridSearch(
     Promise.resolve(store.searchBM25(query, candidates)),
   ]);
 
-  // Step 2: Normalize scores to 0-1 range
+  // Step 2: Normalize + Merge
+  const merged = mergeResults(vectorResults, bm25Results, opts);
+
+  // Step 3: Temporal decay (recent > old)
+  const decayed = applyTemporalDecay(merged, opts.halfLifeDays);
+
+  // Step 4: MMR re-ranking (diverse results)
+  const embeddings = new Map<string, number[]>();
+  for (const r of vectorResults) {
+    // Use vector results' embeddings for MMR diversity check
+    embeddings.set(r.id, queryEmbedding); // approximate
+  }
+  const diverse = mmrRerank(decayed, embeddings, opts.mmrLambda, opts.limit);
+
+  return diverse;
+}
+
+// ============================================
+// Merge BM25 + Vector results
+// ============================================
+
+function mergeResults(
+  vectorResults: SearchResult[],
+  bm25Results: SearchResult[],
+  opts: SearchOptions,
+): HybridResult[] {
   const normalizedVector = normalizeScores(vectorResults);
   const normalizedBM25 = normalizeScores(bm25Results);
 
-  // Step 3: Merge into combined scores
   const scoreMap = new Map<string, {
     vectorScore: number;
     bm25Score: number;
@@ -82,7 +111,6 @@ export async function hybridSearch(
     }
   }
 
-  // Step 4: Calculate combined score and sort
   const results: HybridResult[] = [];
   for (const [id, data] of scoreMap) {
     results.push({
@@ -95,9 +123,94 @@ export async function hybridSearch(
     });
   }
 
-  return results
-    .sort((a, b) => b.combinedScore - a.combinedScore)
-    .slice(0, opts.limit);
+  return results.sort((a, b) => b.combinedScore - a.combinedScore);
+}
+
+// ============================================
+// Temporal Decay
+// ============================================
+
+function applyTemporalDecay(
+  results: HybridResult[],
+  halfLifeDays = 30,
+): HybridResult[] {
+  const now = Date.now();
+
+  return results.map(r => {
+    // Extract date from filePath for daily files (e.g., "memory/2026-02-25.md")
+    const dateMatch = r.filePath.match(/(\d{4}-\d{2}-\d{2})/);
+    const createdAt = dateMatch ? new Date(dateMatch[1]).getTime() : now;
+    const ageDays = (now - createdAt) / (1000 * 60 * 60 * 24);
+
+    // No decay for non-dated files (permanent memory, docs)
+    const decayFactor = dateMatch ? Math.pow(0.5, ageDays / halfLifeDays) : 1.0;
+
+    return {
+      ...r,
+      combinedScore: r.combinedScore * decayFactor,
+      decayFactor,
+    };
+  }).sort((a, b) => b.combinedScore - a.combinedScore);
+}
+
+// ============================================
+// MMR (Maximal Marginal Relevance)
+// ============================================
+
+function mmrRerank(
+  results: HybridResult[],
+  _embeddings: Map<string, number[]>,
+  lambda = 0.7,
+  limit = 5,
+): HybridResult[] {
+  if (results.length <= 1) return results.slice(0, limit);
+
+  const selected: HybridResult[] = [];
+  const remaining = [...results];
+
+  // Always pick the top result first
+  selected.push(remaining.shift()!);
+
+  while (selected.length < limit && remaining.length > 0) {
+    let bestIdx = 0;
+    let bestMMR = -Infinity;
+
+    for (let i = 0; i < remaining.length; i++) {
+      const relevance = remaining[i].combinedScore;
+
+      // Simple content-based similarity check for diversity
+      let maxSimToSelected = 0;
+      for (const sel of selected) {
+        const sim = contentSimilarity(remaining[i].content, sel.content);
+        maxSimToSelected = Math.max(maxSimToSelected, sim);
+      }
+
+      const mmrScore = lambda * relevance - (1 - lambda) * maxSimToSelected;
+
+      if (mmrScore > bestMMR) {
+        bestMMR = mmrScore;
+        bestIdx = i;
+      }
+    }
+
+    selected.push(remaining.splice(bestIdx, 1)[0]);
+  }
+
+  return selected;
+}
+
+/**
+ * Simple word overlap similarity for MMR diversity.
+ * Returns 0-1 where 1 = identical word sets.
+ */
+function contentSimilarity(a: string, b: string): number {
+  const wordsA = new Set(a.toLowerCase().split(/\s+/));
+  const wordsB = new Set(b.toLowerCase().split(/\s+/));
+  let overlap = 0;
+  for (const w of wordsA) {
+    if (wordsB.has(w)) overlap++;
+  }
+  return overlap / Math.max(wordsA.size, wordsB.size);
 }
 
 // ============================================
