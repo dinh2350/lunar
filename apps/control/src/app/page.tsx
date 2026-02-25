@@ -1,4 +1,7 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Chat } from '@/components/chat';
+import { MemoryBrowser } from '@/components/memory-browser';
+import { SessionViewer } from '@/components/session-viewer';
 
 export default function Home() {
   return (
@@ -7,30 +10,26 @@ export default function Home() {
         <h1 className="text-2xl font-bold">🌙 Lunar Control Panel</h1>
       </header>
       
-      <main className="container mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Chat />
-        </div>
-        
-        <div className="space-y-4">
-          <div className="p-4 rounded-lg border">
-            <h3 className="font-semibold mb-2">System Health</h3>
-            <div className="space-y-1 text-sm">
-              <div>❤️ Gateway: <span className="text-green-500">UP</span></div>
-              <div>🤖 Ollama: <span className="text-green-500">UP</span></div>
-              <div>📊 Model: qwen2.5:3b</div>
-            </div>
-          </div>
+      <main className="container mx-auto p-6">
+        <Tabs defaultValue="chat">
+          <TabsList>
+            <TabsTrigger value="chat">💬 Chat</TabsTrigger>
+            <TabsTrigger value="memory">🧠 Memory</TabsTrigger>
+            <TabsTrigger value="sessions">📋 Sessions</TabsTrigger>
+          </TabsList>
           
-          <div className="p-4 rounded-lg border">
-            <h3 className="font-semibold mb-2">Statistics</h3>
-            <div className="space-y-1 text-sm">
-              <div>💬 Messages today: --</div>
-              <div>🔧 Tool calls: --</div>
-              <div>📚 Memory chunks: --</div>
-            </div>
-          </div>
-        </div>
+          <TabsContent value="chat" className="mt-4">
+            <Chat />
+          </TabsContent>
+          
+          <TabsContent value="memory" className="mt-4">
+            <MemoryBrowser />
+          </TabsContent>
+          
+          <TabsContent value="sessions" className="mt-4">
+            <SessionViewer />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
