@@ -20,6 +20,12 @@ importers:
 
   packages/agent:
     dependencies:
+      '@lunar/mcp':
+        specifier: workspace:*
+        version: link:../mcp
+      '@lunar/shared':
+        specifier: workspace:*
+        version: link:../shared
       ollama:
         specifier: ^0.6.3
         version: 0.6.3
