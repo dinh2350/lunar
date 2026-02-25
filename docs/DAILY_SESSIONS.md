@@ -2225,31 +2225,24 @@ What you should have:
 
 ---
 
-### WEEK 14: Multi-Modal + Observability
+### WEEK 14: Multimodal
 
-#### [ ] Day 66 — Vision (Image Analysis)
-- Add image handling to connectors (base64 extraction)
-- Send images to LLaVA/Gemini Vision
+#### [ ] Day 66 — Vision API
+- VisionProvider interface, Ollama + Gemini vision
 
-#### [ ] Day 67 — Audio (Speech-to-Text)
-- Whisper integration for voice messages
-- Telegram voice message → transcription → agent
+#### [ ] Day 67 — Image Understanding + OCR
+- Vision tools, image analysis in agent loop
 
-#### [ ] Day 68 — Token Usage Tracking
-- Track input/output tokens per session
-- Cost estimation calculator
+#### [ ] Day 68 — Audio STT + TTS
+- Whisper/Gemini STT, Edge/Piper TTS, AudioManager
 
-#### [ ] Day 69 — Latency Metrics Dashboard
-- P50, P95, P99 response times
-- Per-model latency comparison
-- Metrics visible in Control UI
+#### [ ] Day 69 — Image Generation
+- Pollinations + ComfyUI providers, image gen tool
 
-#### [ ] Day 70 — Observability Polish
-- Structured logging (pino)
-- Request tracing across gateway → agent → tools
-- Error rate monitoring
+#### [ ] Day 70 — Multimodal Integration + Week 14 Wrap
+- MultimodalRouter, channel adapters, Phase 3 wrap
 
-### WEEK 14 CHECKPOINT: Multi-modal agent + full observability ✅
+### WEEK 14 CHECKPOINT: Full multimodal agent ✅
 
 ---
 
@@ -2257,27 +2250,24 @@ What you should have:
 
 ---
 
-### WEEK 15: Polish + Documentation + CI/CD
+### WEEK 15: Testing + CI/CD
 
-#### [ ] Day 71 — Comprehensive README
-- Architecture diagram (Mermaid)
-- Feature list with screenshots
-- Quick start (< 5 min)
+#### [ ] Day 71 — Testing Strategy + Vitest
+- AI testing pyramid, unit tests for guards, mock LLM integration tests
 
-#### [ ] Day 72 — Demo Video
-- Record 5-10 min walkthrough
-- Show: Telegram chat, tool use, memory, dashboard, eval results
+#### [ ] Day 72 — E2E Testing + CI
+- TestClient, GitHub Actions workflow, quality gate
 
-#### [ ] Day 73 — GitHub Actions CI/CD
-- Lint + test (TypeScript + Python)
-- Build Docker images
-- Deploy on merge to main
+#### [ ] Day 73 — Performance Optimization
+- LLM cache, parallel tools, connection pooling, streaming
 
-#### [ ] Day 74 — Kubernetes Manifests (Basic)
-- Deployment + Service YAML files
-- Shows you know K8s basics
+#### [ ] Day 74 — Monitoring + Metrics
+- MetricsCollector, instrumentation, health endpoint
 
-#### [ ] Day 75 — Code Cleanup + Final Polish
+#### [ ] Day 75 — Documentation + Week 15 Wrap
+- README template, API reference, CONTRIBUTING.md
+
+### WEEK 15 CHECKPOINT: Production-ready with tests + CI/CD ✅
 - Remove dead code
 - Consistent naming
 - Good commit history
@@ -2286,57 +2276,108 @@ What you should have:
 
 ---
 
-### WEEK 16: Public Launch + Blog Posts
+### WEEK 16: Deploy
 
-#### [ ] Day 76 — Launch on GitHub
-- Public repo, good README, LICENSE (MIT)
-- Create GitHub releases
+#### [ ] Day 76 — Production Docker Setup
+- Multi-stage Dockerfile, docker-compose.prod.yml, Caddy reverse proxy
 
-#### [ ] Day 77 — Blog Post 1: "Building Production RAG with Hybrid Search"
-- Technical depth, code examples, benchmark results
+#### [ ] Day 77 — Backup, Recovery + Scaling
+- Automated backups, restore scripts, horizontal scaling options
 
-#### [ ] Day 78 — Blog Post 2: "Custom Agent Engine vs LangGraph"
-- Framework comparison with real data
+#### [ ] Day 78 — VPS Deployment
+- Deploy to VPS with Docker, configure domain + HTTPS
 
-#### [ ] Day 79 — Share on Social Media
-- LinkedIn post, Twitter thread, Reddit (r/LocalLLaMA, r/MachineLearning)
-- Hacker News submission (if confident)
+#### [ ] Day 79 — Security Hardening
+- Zod config validation, rate limiting, CORS, helmet, API key auth
 
-#### [ ] Day 80 — Community Engagement
-- Join AI Engineer Discord, Latent Space Discord
-- Answer questions, share your experience
-- Connect with other AI engineers
+#### [ ] Day 80 — Deployment Checklist + Week 16 Wrap
+- Full production readiness checklist
 
-### WEEK 16 CHECKPOINT: Public project + 2 blog posts + social presence ✅
+### WEEK 16 CHECKPOINT: Production deployment running ✅
 
 ---
 
-### WEEK 17-20: Job Hunt (20 Days)
+### WEEK 17: Polish + UX
 
-#### [ ] Day 81-85 (Week 17): Applications
-- Apply to 4+ positions per day (20+ total in the week)
-- Customize resume for each (highlight relevant features)
-- Target: AI-native startups first, then tech companies adding AI
-- Platforms: ai-jobs.net, YC Jobs, LinkedIn, Wellfound
+#### [ ] Day 81 — Conversation UX Patterns
+- Typing indicators, smart follow-ups, message formatting
 
-#### [ ] Day 86-90 (Week 18): Interview Prep
-- Practice system design: "Design a RAG system for X"
-- Practice coding: implement a tool-calling agent live
-- Practice behavioral: "Tell me about your project"
-- Mock interviews with friends or AI
-- Review LEARNING_GUIDE.md Part 7 for interview answers
+#### [ ] Day 82 — Personality + Branding
+- System prompt design, tone of voice, welcome messages
 
-#### [ ] Day 91-95 (Week 19): Networking
-- Attend AI meetups (virtual or in-person)
-- DM founders of AI startups on Twitter/LinkedIn
-- Contribute to open-source AI projects
-- Write another blog post if time allows
+#### [ ] Day 83 — Edge Cases + Resilience
+- Input validation, flood control, request queuing, timeouts
 
-#### [ ] Day 96-100 (Week 20): Follow Up + Iterate
-- Follow up on all applications
-- Iterate on feedback from interviews
-- Continue applying
-- Target: 5-8 interviews scheduled
+#### [ ] Day 84 — Accessibility + Help System
+- Help commands, ARIA labels, keyboard shortcuts
+
+#### [ ] Day 85 — Week 17 Wrap
+- Full UX audit checklist
+
+### WEEK 17 CHECKPOINT: Polished user experience ✅
+
+---
+
+### WEEK 18: Launch
+
+#### [ ] Day 86 — Beta Launch Strategy
+- Tester recruitment, feedback collection, success metrics
+
+#### [ ] Day 87 — Beta Monitoring + Triage
+- Analytics dashboard, alerts, bug triage workflow
+
+#### [ ] Day 88 — Iteration + Fixes
+- Process feedback, fix top bugs, ship improvements
+
+#### [ ] Day 89 — Public Launch Prep
+- README polish, demo video, landing page, social posts
+
+#### [ ] Day 90 — Launch Day!
+- GitHub release v1.0.0, post everywhere, celebrate
+
+### WEEK 18 CHECKPOINT: Public launch complete ✅
+
+---
+
+### WEEK 19: Portfolio
+
+#### [ ] Day 91 — GitHub Profile + Showcase
+- Profile README, pinned repos, commit history polish
+
+#### [ ] Day 92 — Technical Blog Writing
+- 3 blog posts: architecture, RAG deep-dive, learning journey
+
+#### [ ] Day 93 — Demo Video + Presentation
+- 5-min demo video, presentation slides for interviews
+
+#### [ ] Day 94 — LinkedIn + Professional Presence
+- AI Engineer positioning, networking strategy
+
+#### [ ] Day 95 — Week 19 Wrap
+- Portfolio completeness check, cross-linking
+
+### WEEK 19 CHECKPOINT: Full portfolio ready ✅
+
+---
+
+### WEEK 20: Job Hunt
+
+#### [ ] Day 96 — AI Engineer Resume
+- 1-page resume with AI/ML skills, quantified metrics
+
+#### [ ] Day 97 — Interview Prep
+- RAG, agents, system design questions, STAR stories
+
+#### [ ] Day 98 — Job Search Strategy
+- Job boards, application tracker, cover letter template
+
+#### [ ] Day 99 — Continuous Learning Plan
+- Weekly routine, newsletters, communities, skills roadmap
+
+#### [ ] Day 100 — 🎓 Graduation Day!
+- Reflect, celebrate, plan what's next
+
+### WEEK 20 CHECKPOINT: AI Engineer career launched ✅
 
 ---
 
@@ -2366,12 +2407,12 @@ Week 13: [ ][ ][ ][ ][ ]  Fine-Tuning
 Week 14: [ ][ ][ ][ ][ ]  Multi-Modal + Observability
 
 PHASE 4: Launch + Job Hunt
-Week 15: [ ][ ][ ][ ][ ]  Polish + CI/CD
-Week 16: [ ][ ][ ][ ][ ]  Public Launch
-Week 17: [ ][ ][ ][ ][ ]  Applications
-Week 18: [ ][ ][ ][ ][ ]  Interview Prep
-Week 19: [ ][ ][ ][ ][ ]  Networking
-Week 20: [ ][ ][ ][ ][ ]  Follow Up
+Week 15: [ ][ ][ ][ ][ ]  Testing + CI/CD
+Week 16: [ ][ ][ ][ ][ ]  Deploy
+Week 17: [ ][ ][ ][ ][ ]  Polish + UX
+Week 18: [ ][ ][ ][ ][ ]  Launch
+Week 19: [ ][ ][ ][ ][ ]  Portfolio
+Week 20: [ ][ ][ ][ ][ ]  Job Hunt
 
 Total: ___/100 days completed
 ```

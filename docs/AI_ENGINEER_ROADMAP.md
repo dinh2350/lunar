@@ -741,17 +741,17 @@ Month 3: Differentiation
 ├── Week 11: AI safety + guardrails + structured outputs
 └── Week 12: Sub-agents + LangGraph comparison project
 
-Month 4: Advanced + Polish
-├── Week 13: Fine-tuning experiment (Python/Unsloth) + blog post
-├── Week 14: Multi-modal (vision/audio) + observability dashboard
-├── Week 15: Polish + documentation + demo video + CI/CD
-└── Week 16: Public launch + 2 blog posts
+Month 4: Production + Launch
+├── Week 13: Fine-tuning (QLoRA + Unsloth + Ollama import)
+├── Week 14: Multi-modal (vision, audio, image generation)
+├── Week 15: Testing + CI/CD + monitoring + documentation
+└── Week 16: Production deploy (Docker, VPS, security)
 
-Month 5: Job Hunt
-├── Week 17: Apply to 20+ positions
-├── Week 18: Interview prep + mock interviews
-├── Week 19: Network on LinkedIn/Twitter/Discord
-└── Week 20: Follow up + iterate on feedback
+Month 5: Launch + Job Hunt
+├── Week 17: Polish + UX (personality, edge cases, a11y)
+├── Week 18: Launch (beta, monitoring, go live)
+├── Week 19: Portfolio (GitHub, blog, video, LinkedIn)
+└── Week 20: Job hunt (resume, interviews, applications)
 ```
 
 ---
@@ -1068,17 +1068,15 @@ WEEK 15: Polish + Documentation + CI/CD
 WEEK 16: Public Launch + Blog Posts
 ├── Launch publicly on GitHub
 ├── Share on Twitter/LinkedIn/Reddit
-├── Write blog post 1: "Building Production RAG with Hybrid Search"
-├── Write blog post 2: "Custom Agent Engine vs LangGraph: A Real Comparison"
-├── Write blog post 3 (optional): "Adding MCP to Your AI Agent"
+├── Write blog posts about architecture, RAG, and journey
 └── Deliverable: Public project + 2-3 technical articles
 
-WEEK 17-20: Job Hunt
-├── Week 17: Apply to 20+ positions (target AI-native startups first)
-├── Week 18: Practice interview questions (system design + coding)
-├── Week 19: Network on LinkedIn, Twitter, AI Discord communities
-├── Week 20: Follow up, iterate on feedback, continue applying
-└── Target: 5-8 interviews scheduled
+WEEK 17-20: Polish, Launch, Portfolio & Job Hunt
+├── Week 17: Polish + UX (personality, edge cases, accessibility)
+├── Week 18: Launch (beta testing, monitoring, go live)
+├── Week 19: Portfolio (GitHub profile, blog, demo video, LinkedIn)
+├── Week 20: Job hunt (resume, interviews, applications)
+└── Target: AI Engineer role secured
 ```
 
 ---
