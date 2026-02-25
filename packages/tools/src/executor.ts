@@ -6,6 +6,8 @@ import { readFileTool, executeReadFile, listDirTool, executeListDir, writeFileTo
 import { memorySearchTool, createMemorySearchExecutor } from './memory-search.js';
 import { memoryWriteTool, createMemoryWriteExecutor } from './memory-write.js';
 import type { VectorStore } from '../../memory/src/store.js';
+import type { MemoryFiles } from '../../memory/src/files.js';
+import type { MemoryIndexer } from '../../memory/src/indexer.js';
 
 // Registry: all available tools
 const tools: Map<string, {
@@ -22,16 +24,20 @@ tools.set('list_directory', { definition: listDirTool, execute: executeListDir }
 tools.set('write_file', { definition: writeFileTool, execute: executeWriteFile });
 
 /**
- * Initialize memory-dependent tools. Call once at startup with a VectorStore.
+ * Initialize memory-dependent tools. Call once at startup with VectorStore + MemoryFiles + MemoryIndexer.
  */
-export function initializeTools(store: VectorStore, memoryBasePath = './data/workspace') {
+export function initializeTools(
+  store: VectorStore,
+  memoryFiles: MemoryFiles,
+  indexer: MemoryIndexer,
+) {
   const executeMemorySearch = createMemorySearchExecutor(store);
   tools.set('memory_search', {
     definition: memorySearchTool,
     execute: (args: any) => executeMemorySearch(args).then(r => r.result),
   });
 
-  const executeMemoryWrite = createMemoryWriteExecutor(store, memoryBasePath);
+  const executeMemoryWrite = createMemoryWriteExecutor(store, memoryFiles, indexer);
   tools.set('memory_write', {
     definition: memoryWriteTool,
     execute: (args: any) => executeMemoryWrite(args).then(r => r.result),

@@ -1,9 +1,7 @@
-import { appendFile, mkdir } from 'fs/promises';
-import path from 'path';
 import type { ToolDefinition, ToolResult } from './types.js';
-import { chunkMarkdown } from '../../memory/src/chunker.js';
-import { embedBatch } from '../../memory/src/embedder.js';
 import type { VectorStore } from '../../memory/src/store.js';
+import type { MemoryFiles } from '../../memory/src/files.js';
+import type { MemoryIndexer } from '../../memory/src/indexer.js';
 
 export const memoryWriteTool: ToolDefinition = {
   type: 'function',
@@ -32,7 +30,11 @@ export const memoryWriteTool: ToolDefinition = {
   },
 };
 
-export function createMemoryWriteExecutor(store: VectorStore, basePath: string) {
+export function createMemoryWriteExecutor(
+  store: VectorStore,
+  memoryFiles: MemoryFiles,
+  indexer: MemoryIndexer,
+) {
   return async function executeMemoryWrite(
     args: { key: string; content: string; permanent?: string },
   ): Promise<ToolResult> {
@@ -40,24 +42,13 @@ export function createMemoryWriteExecutor(store: VectorStore, basePath: string) 
     const isPermanent = args.permanent === 'true';
 
     try {
-      // Choose file: permanent facts go to MEMORY.md, daily to dated file
+      // Write to the appropriate memory file
       const filePath = isPermanent
-        ? path.join(basePath, 'MEMORY.md')
-        : path.join(basePath, 'memory', `${new Date().toISOString().split('T')[0]}.md`);
+        ? await memoryFiles.appendPermanentMemory(args.key, args.content)
+        : await memoryFiles.appendDailyNote(args.key, args.content);
 
-      // Ensure directory exists
-      await mkdir(path.dirname(filePath), { recursive: true });
-
-      // Append to the file
-      const entry = `\n## ${args.key}\n${args.content}\n_Saved: ${new Date().toISOString()}_\n`;
-      await appendFile(filePath, entry);
-
-      // Index for search (so it's immediately searchable)
-      const chunks = chunkMarkdown(entry, path.relative(basePath, filePath));
-      if (chunks.length > 0) {
-        const embeddings = await embedBatch(chunks.map(c => c.content));
-        store.insertChunks(chunks, embeddings);
-      }
+      // Auto-index the changed file
+      await indexer.indexFile(filePath);
 
       return {
         name: 'memory_write',
