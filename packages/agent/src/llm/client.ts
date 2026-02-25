@@ -1,95 +1,90 @@
-/**
- * LLM Client — talks to Ollama
- *
- * This is the lowest-level AI code in Lunar.
- * Everything else builds on top of this.
- */
 import { Ollama } from 'ollama';
-
-// === CONNECTION ===
-export const ollama = new Ollama({
-  host: 'http://localhost:11434',
-});
-
-// === CONFIGURATION ===
+import type { LLMProvider, Message, ChatOptions, ChatResponse } from './types.js';
 
 /**
- * LLM Configuration
- * Controls how the AI behaves for each request.
+ * Ollama LLM Provider — runs AI locally on your Mac.
  *
- * Think of this like Express request options:
- *   { timeout: 5000, maxRetries: 3 }
- * But for AI:
- *   { temperature: 0.7, maxTokens: 2048 }
+ * WHAT: Wraps the Ollama API into a clean provider interface
+ * WHY:  So we can swap to Groq/Gemini later without changing other code
+ * WHEN: Default provider for development (free, private, offline)
  */
-export interface LLMConfig {
-  model: string;       // which AI brain to use
-  temperature: number; // 0 = deterministic, 1 = creative
-  maxTokens: number;   // max response length in tokens
+export class OllamaProvider implements LLMProvider {
+  readonly name = 'ollama';
+  private client: Ollama;
+  private defaultModel: string;
+
+  constructor(host = 'http://localhost:11434', defaultModel = 'llama3.2') {
+    this.client = new Ollama({ host });
+    this.defaultModel = defaultModel;
+  }
+
+  /**
+   * Non-streaming chat — waits for full response.
+   * Use when: you need the complete text before proceeding
+   * (e.g., evaluating the response, parsing JSON from it)
+   */
+  async chat(messages: Message[], options?: ChatOptions): Promise<ChatResponse> {
+    const model = options?.model ?? this.defaultModel;
+
+    const response = await this.client.chat({
+      model,
+      messages,
+      options: {
+        temperature: options?.temperature ?? 0.7,
+        num_predict: options?.maxTokens ?? 2048,
+      },
+    });
+
+    return {
+      content: response.message.content,
+      model,
+      tokensUsed: response.eval_count,
+    };
+  }
+
+  /**
+   * Streaming chat — calls onToken for each word as it's generated.
+   * Use when: displaying to user (CLI, chat UI, Telegram)
+   *
+   * How it works:
+   *   1. Ollama starts generating tokens
+   *   2. Each token is sent to onToken() immediately
+   *   3. Meanwhile, we build the full string
+   *   4. When done, return the complete response
+   */
+  async chatStream(
+    messages: Message[],
+    onToken: (token: string) => void,
+    options?: ChatOptions,
+  ): Promise<ChatResponse> {
+    const model = options?.model ?? this.defaultModel;
+
+    const stream = await this.client.chat({
+      model,
+      messages,
+      stream: true,   // ← THE KEY: enables streaming
+      options: {
+        temperature: options?.temperature ?? 0.7,
+        num_predict: options?.maxTokens ?? 2048,
+      },
+    });
+
+    // Collect the full response while streaming each token
+    let fullContent = '';
+
+    // "for await" reads async streams — same as Node.js ReadableStream
+    for await (const chunk of stream) {
+      const token = chunk.message.content;
+      fullContent += token;
+      onToken(token);  // ← print/display immediately
+    }
+
+    return {
+      content: fullContent,
+      model,
+    };
+  }
 }
 
-/** Default config — good for general conversation */
-const DEFAULT_CONFIG: LLMConfig = {
-  model: 'llama3.2',
-  temperature: 0.7,
-  maxTokens: 2048,
-};
-
-// === PRESET CONFIGS FOR DIFFERENT TASKS ===
-
-/** For code generation — precise, no creativity */
-export const CODE_CONFIG: Partial<LLMConfig> = {
-  temperature: 0.1,
-  maxTokens: 4096,
-};
-
-/** For factual Q&A — deterministic, consistent answers */
-export const FACTUAL_CONFIG: Partial<LLMConfig> = {
-  temperature: 0,
-  maxTokens: 1024,
-};
-
-/** For creative tasks — more variation */
-export const CREATIVE_CONFIG: Partial<LLMConfig> = {
-  temperature: 1.0,
-  maxTokens: 4096,
-};
-
-// === MAIN CHAT FUNCTION ===
-
-/**
- * Send a message to the AI.
- *
- * @param userMessage  - What the user typed
- * @param systemPrompt - Instructions for the AI (optional)
- * @param config       - Override default settings (optional)
- * @returns The AI's response text
- */
-export async function chat(
-  userMessage: string,
-  systemPrompt?: string,
-  config: Partial<LLMConfig> = {}
-): Promise<string> {
-  // Merge: defaults ← overrides
-  const cfg = { ...DEFAULT_CONFIG, ...config };
-
-  const response = await ollama.chat({
-    model: cfg.model,
-    messages: [
-      {
-        role: 'system',
-        content: systemPrompt ?? 'You are Lunar, a helpful personal assistant. Be concise.',
-      },
-      {
-        role: 'user',
-        content: userMessage,
-      },
-    ],
-    options: {
-      temperature: cfg.temperature,
-      num_predict: cfg.maxTokens, // Ollama uses "num_predict" instead of "max_tokens"
-    },
-  });
-
-  return response.message.content;
-}
+// Default provider instance
+export const defaultProvider = new OllamaProvider();
