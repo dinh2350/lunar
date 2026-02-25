@@ -453,4 +453,6 @@ Total cost: $0
 
 ---
 
+### run command to test: npx tsx packages/agent/src/cli.ts
+
 **Next → [Day 3: Tokens, Temperature, and Configuration](day-03.md)**
