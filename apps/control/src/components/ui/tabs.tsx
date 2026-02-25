@@ -10,10 +10,12 @@ interface TabsContextValue {
 
 const TabsContext = React.createContext<TabsContextValue>({ value: '', onValueChange: () => {} });
 
-export function Tabs({ defaultValue, children, className }: { defaultValue: string; children: React.ReactNode; className?: string }) {
-  const [value, setValue] = React.useState(defaultValue);
+export function Tabs({ defaultValue, value, onValueChange, children, className }: { defaultValue?: string; value?: string; onValueChange?: (value: string) => void; children: React.ReactNode; className?: string }) {
+  const [internalValue, setValue] = React.useState(defaultValue || '');
+  const currentValue = value ?? internalValue;
+  const handleChange = onValueChange ?? setValue;
   return (
-    <TabsContext.Provider value={{ value, onValueChange: setValue }}>
+    <TabsContext.Provider value={{ value: currentValue, onValueChange: handleChange }}>
       <div className={className}>{children}</div>
     </TabsContext.Provider>
   );
