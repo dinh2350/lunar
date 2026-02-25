@@ -1,1 +1,1 @@
-{"name":"@lunar/memory","version":"0.1.0","type":"module","main":"src/index.ts","dependencies":{"ollama":"^0.6.3"}}
+{"name":"@lunar/memory","version":"0.1.0","type":"module","main":"src/index.ts","dependencies":{"better-sqlite3":"^12.6.2","ollama":"^0.6.3","sqlite-vec":"0.1.7-alpha.2"},"devDependencies":{"@types/better-sqlite3":"^7.6.13"}}
