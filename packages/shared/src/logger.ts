@@ -1,22 +1,45 @@
 // packages/shared/src/logger.ts
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-const isDocker = process.env.NODE_ENV === 'production';
+interface LogEntry {
+  timestamp: string;
+  level: LogLevel;
+  service: string;
+  message: string;
+  [key: string]: unknown;
+}
 
-export function log(level: LogLevel, message: string, data?: Record<string, unknown>) {
-  const entry = {
+const LOG_LEVELS: Record<LogLevel, number> = {
+  debug: 0, info: 1, warn: 2, error: 3
+};
+
+const currentLevel = (process.env.LOG_LEVEL as LogLevel) || 'info';
+
+export function createLogger(service: string) {
+  return {
+    debug: (msg: string, data?: Record<string, unknown>) => emit('debug', service, msg, data),
+    info:  (msg: string, data?: Record<string, unknown>) => emit('info',  service, msg, data),
+    warn:  (msg: string, data?: Record<string, unknown>) => emit('warn',  service, msg, data),
+    error: (msg: string, data?: Record<string, unknown>) => emit('error', service, msg, data),
+  };
+}
+
+function emit(level: LogLevel, service: string, message: string, data?: Record<string, unknown>) {
+  if (LOG_LEVELS[level] < LOG_LEVELS[currentLevel]) return;
+
+  const entry: LogEntry = {
     timestamp: new Date().toISOString(),
     level,
+    service,
     message,
     ...data,
   };
 
-  if (isDocker) {
-    // JSON for Docker log aggregation (like CloudWatch, Datadog)
-    console.log(JSON.stringify(entry));
+  // JSON for Docker, pretty for dev
+  if (process.env.NODE_ENV === 'production') {
+    process.stdout.write(JSON.stringify(entry) + '\n');
   } else {
-    // Pretty print for development
-    const icons = { debug: '🔍', info: 'ℹ️', warn: '⚠️', error: '❌' };
-    console.log(`${icons[level]} [${level.toUpperCase()}] ${message}`, data || '');
+    const icon = { debug: '🔍', info: 'ℹ️', warn: '⚠️', error: '❌' }[level];
+    console.log(`${icon} [${service}] ${message}`, data ? JSON.stringify(data) : '');
   }
 }
