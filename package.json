@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "tsx packages/gateway/src/index.ts",
     "cli": "tsx packages/agent/src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "eval": "./scripts/eval.sh",
+    "eval:quick": "cd services/eval && python runner.py",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
