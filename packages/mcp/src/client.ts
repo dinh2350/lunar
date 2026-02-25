@@ -1,10 +1,12 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import type { ToolDefinition } from '@lunar/shared';
 
 /**
  * MCP Client — connects to MCP servers and exposes their tools
  * to the Lunar agent engine.
+ * Supports both stdio (local) and HTTP+SSE (remote) transports.
  */
 export class MCPClient {
   private client: Client;
@@ -21,8 +23,8 @@ export class MCPClient {
     });
   }
 
-  /** Connect to MCP server via stdio */
-  async connect(command: string, args: string[] = [], env?: Record<string, string>): Promise<void> {
+  /** Connect to MCP server via stdio (local) */
+  async connectStdio(command: string, args: string[] = [], env?: Record<string, string>): Promise<void> {
     const transport = new StdioClientTransport({
       command,
       args,
@@ -31,7 +33,18 @@ export class MCPClient {
 
     await this.client.connect(transport);
     this.connected = true;
-    console.log(`  🔌 MCP connected: ${this.serverName}`);
+    console.log(`  🔌 MCP connected (stdio): ${this.serverName}`);
+  }
+
+  /** Connect to MCP server via HTTP+SSE (remote) */
+  async connectHTTP(url: string, headers?: Record<string, string>): Promise<void> {
+    const transport = new SSEClientTransport(new URL(url), {
+      requestInit: { headers },
+    });
+
+    await this.client.connect(transport);
+    this.connected = true;
+    console.log(`  🔌 MCP connected (HTTP): ${this.serverName}`);
   }
 
   /** Get tools from MCP server as Lunar ToolDefinitions */

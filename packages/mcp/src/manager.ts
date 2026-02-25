@@ -3,22 +3,36 @@ import type { ToolDefinition } from '@lunar/shared';
 
 interface MCPServerConfig {
   name: string;
-  command: string;
+  transport?: 'stdio' | 'http';
+  // stdio options
+  command?: string;
   args?: string[];
   env?: Record<string, string>;
+  // http options
+  url?: string;
+  headers?: Record<string, string>;
   enabled?: boolean;
 }
 
 /**
  * Manages multiple MCP server connections.
  * Loads config, connects, and provides unified tool list.
+ * Supports both stdio (local) and HTTP+SSE (remote) transports.
  */
 export class MCPManager {
   private clients: Map<string, MCPClient> = new Map();
 
   async connectServer(config: MCPServerConfig): Promise<void> {
     const client = new MCPClient(config.name);
-    await client.connect(config.command, config.args || [], config.env);
+
+    if (config.transport === 'http' && config.url) {
+      await client.connectHTTP(config.url, config.headers);
+    } else if (config.command) {
+      await client.connectStdio(config.command, config.args || [], config.env);
+    } else {
+      throw new Error(`Invalid MCP server config for "${config.name}": need command (stdio) or url (http)`);
+    }
+
     this.clients.set(config.name, client);
   }
 

@@ -2,12 +2,14 @@
   "servers": [
     {
       "name": "filesystem",
+      "transport": "stdio",
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "${LUNAR_WORKSPACE}"],
       "enabled": true
     },
     {
       "name": "github",
+      "transport": "stdio",
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" },
@@ -16,16 +18,26 @@
     },
     {
       "name": "fetch",
+      "transport": "stdio",
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-fetch"],
       "enabled": true
     },
     {
       "name": "sqlite",
+      "transport": "stdio",
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "${LUNAR_DATA}/vectors.db"],
       "enabled": false,
       "comment": "Enable for direct DB inspection"
+    },
+    {
+      "name": "team-tools",
+      "transport": "http",
+      "url": "http://mcp-server.yourteam.com:3200/sse",
+      "headers": { "Authorization": "Bearer ${MCP_API_KEY}" },
+      "enabled": false,
+      "comment": "Team-shared MCP server (enable when available)"
     }
   ]
 }
