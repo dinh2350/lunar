@@ -2,17 +2,14 @@ import * as readline from 'readline';
 import type { Message } from './llm/types.js';
 import { runAgent } from './runner.js';
 import { getToolDefinitions } from '../../tools/src/executor.js';
+import { SessionManager } from '../../session/src/manager.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-// Conversation history
-const messages: Message[] = [
-  {
-    role: 'system',
-    content: `You are Lunar, a helpful personal AI assistant.
+const SYSTEM_PROMPT = `You are Lunar, a helpful personal AI assistant.
 
 ## YOUR CAPABILITIES
 - You have a knowledge base searchable via the memory_search tool
@@ -38,21 +35,51 @@ const messages: Message[] = [
 - memory_search: search knowledge base for information
 - memory_write: save important info to memory for future retrieval
 
-Be concise and helpful.`,
-  },
+Be concise and helpful.`;
+
+// Session management
+const sessionManager = new SessionManager('./data/sessions');
+const SESSION_ID = sessionManager.resolveSessionId('cli', 'local');
+
+// Conversation history
+const messages: Message[] = [
+  { role: 'system', content: SYSTEM_PROMPT },
 ];
 
 // Runtime config
 let model = 'llama3.2';
 let temperature = 0.7;
 
+async function loadPreviousSession(): Promise<void> {
+  const turns = await sessionManager.loadRecentHistory(SESSION_ID, 20);
+  if (turns.length > 0) {
+    const restored = sessionManager.toMessages(turns);
+    messages.push(...(restored as Message[]));
+    console.log(`📂 Restored ${turns.length} turns from previous session\n`);
+  }
+}
+
 async function chat(userInput: string): Promise<void> {
   messages.push({ role: 'user', content: userInput });
+
+  // Persist user message
+  await sessionManager.appendTurn(SESSION_ID, { role: 'user', content: userInput });
 
   const result = await runAgent(messages, { model, temperature });
 
   // Add assistant response to history
   messages.push({ role: 'assistant', content: result.response });
+
+  // Persist assistant message (with tool calls)
+  await sessionManager.appendTurn(SESSION_ID, {
+    role: 'assistant',
+    content: result.response,
+    toolCalls: result.toolCalls.map(tc => ({
+      name: tc.tool,
+      args: tc.args,
+      result: tc.result,
+    })),
+  });
 
   console.log(`\nLunar: ${result.response}`);
 
@@ -86,7 +113,22 @@ function handleCommand(input: string): boolean {
     }
     case '/clear': {
       messages.splice(1);
-      console.log('🗑️  History cleared\n');
+      console.log('🗑️  History cleared (session file preserved)\n');
+      return true;
+    }
+    case '/sessions': {
+      sessionManager.listSessions().then(sessions => {
+        if (sessions.length === 0) {
+          console.log('No saved sessions.\n');
+        } else {
+          console.log('\nSaved sessions:');
+          for (const s of sessions) {
+            const active = s.sessionId === SESSION_ID ? ' (current)' : '';
+            console.log(`  📝 ${s.sessionId}${active} — ${s.turns} turns, last: ${s.lastActive}`);
+          }
+          console.log('');
+        }
+      });
       return true;
     }
     case '/tools': {
@@ -104,6 +146,7 @@ Commands:
   /temp <0-2>       Set temperature
   /model <name>     Switch model
   /tools            List available tools
+  /sessions         List saved sessions
   /history          Show conversation size
   /clear            Clear history
   /help             Show this
@@ -136,4 +179,5 @@ console.log('║  🌙 Lunar AI Agent — v0.2 (with tools)  ║');
 console.log('║  I can check the time and do math!      ║');
 console.log('╚═════════════════════════════════════════╝\n');
 
-ask();
+// Load previous session before starting
+loadPreviousSession().then(() => ask());
