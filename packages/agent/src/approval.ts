@@ -11,13 +11,30 @@ const DENY_PATTERNS = [
   /mkfs|format/i,
 ];
 
-// Tools that are always safe
+// Tools that are always safe (including read-only MCP tools)
 const AUTO_APPROVE_TOOLS = new Set([
   'get_current_datetime',
   'calculate',
   'read_file',
   'list_directory',
+  'memory_search',
 ]);
+
+// Read-only MCP tool patterns (auto-approve)
+const MCP_AUTO_PATTERNS = [
+  /^mcp_.*_search/,
+  /^mcp_.*_list/,
+  /^mcp_.*_read/,
+  /^mcp_.*_get/,
+  /^mcp_fetch_/,
+];
+
+// Destructive MCP tool patterns (always deny)
+const MCP_DENY_PATTERNS = [
+  /^mcp_.*_drop/i,
+  /^mcp_.*_delete_repo/i,
+  /^mcp_.*_truncate/i,
+];
 
 export function getPolicy(toolName: string, args: Record<string, any>): ApprovalPolicy {
   // Check deny patterns for bash
@@ -25,6 +42,19 @@ export function getPolicy(toolName: string, args: Record<string, any>): Approval
     for (const pattern of DENY_PATTERNS) {
       if (pattern.test(args.command)) return 'deny';
     }
+  }
+
+  // MCP tool deny patterns
+  if (toolName.startsWith('mcp_')) {
+    for (const pattern of MCP_DENY_PATTERNS) {
+      if (pattern.test(toolName)) return 'deny';
+    }
+    // MCP auto-approve (read-only)
+    for (const pattern of MCP_AUTO_PATTERNS) {
+      if (pattern.test(toolName)) return 'auto';
+    }
+    // All other MCP tools need approval (write operations)
+    return 'ask';
   }
 
   // Auto-approve safe tools

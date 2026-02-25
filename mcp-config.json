@@ -3,7 +3,7 @@
     {
       "name": "filesystem",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/lunar/.lunar"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${LUNAR_WORKSPACE}"],
       "enabled": true
     },
     {
@@ -11,7 +11,21 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" },
-      "enabled": false
+      "enabled": false,
+      "comment": "Set GITHUB_TOKEN in .env to enable"
+    },
+    {
+      "name": "fetch",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "enabled": true
+    },
+    {
+      "name": "sqlite",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "${LUNAR_DATA}/vectors.db"],
+      "enabled": false,
+      "comment": "Enable for direct DB inspection"
     }
   ]
 }
