@@ -24,6 +24,16 @@ importers:
         specifier: ^0.6.3
         version: 0.6.3
 
+  packages/memory:
+    dependencies:
+      ollama:
+        specifier: ^0.6.3
+        version: 0.6.3
+
+  packages/shared: {}
+
+  packages/tools: {}
+
 packages:
 
   '@esbuild/aix-ppc64@0.27.3':
