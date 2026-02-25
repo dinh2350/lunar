@@ -16,6 +16,10 @@ const messages: Message[] = [
 You have access to tools. Use them when appropriate:
 - get_current_datetime: for time/date questions
 - calculate: for ANY math (never do math in your head!)
+- bash: execute shell commands (ls, git, node -v, etc.)
+- read_file: read file contents
+- list_directory: list files in a directory
+- write_file: create or modify files (only when user asks)
 
 If the user asks for something you can't do, say so honestly.
 Be concise and friendly.`,

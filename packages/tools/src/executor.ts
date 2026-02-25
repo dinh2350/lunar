@@ -1,19 +1,14 @@
 import type { ToolDefinition, ToolResult } from './types.js';
 import { datetimeTool, executeDatetime } from './datetime.js';
 import { calculatorTool, executeCalculator } from './calculator.js';
+import { bashTool, executeBash } from './bash.js';
+import { readFileTool, executeReadFile, listDirTool, executeListDir, writeFileTool, executeWriteFile } from './filesystem.js';
 
 /**
  * Tool Executor — the central hub that dispatches tool calls to the right handler.
  *
  * WHAT: Receives a tool name + arguments, runs the corresponding function, returns result
  * WHY:  Clean separation — AI decides WHAT to call, executor actually runs it
- *
- * NODE.JS ANALOGY: Like an Express router that maps URLs to handlers:
- *   router.get('/weather', weatherHandler)
- *   router.get('/time', timeHandler)
- *
- *   executor.register('get_weather', weatherHandler)
- *   executor.register('get_current_datetime', datetimeHandler)
  */
 
 // Registry: all available tools
@@ -22,16 +17,13 @@ const tools: Map<string, {
   execute: (args: any) => string | Promise<string>;
 }> = new Map();
 
-// Register built-in tools
-tools.set('get_current_datetime', {
-  definition: datetimeTool,
-  execute: executeDatetime,
-});
-
-tools.set('calculate', {
-  definition: calculatorTool,
-  execute: executeCalculator,
-});
+// Register all tools
+tools.set('get_current_datetime', { definition: datetimeTool, execute: executeDatetime });
+tools.set('calculate', { definition: calculatorTool, execute: executeCalculator });
+tools.set('bash', { definition: bashTool, execute: executeBash });
+tools.set('read_file', { definition: readFileTool, execute: executeReadFile });
+tools.set('list_directory', { definition: listDirTool, execute: executeListDir });
+tools.set('write_file', { definition: writeFileTool, execute: executeWriteFile });
 
 /**
  * Get all tool definitions (to send to the AI)
