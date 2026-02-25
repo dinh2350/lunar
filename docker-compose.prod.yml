@@ -1,7 +1,22 @@
-# Production-grade Docker Compose
+# Production-grade Docker Compose with Caddy reverse proxy
 # Usage: docker compose -f docker-compose.prod.yml up -d
 
 services:
+  # ---- Reverse Proxy ----
+  caddy:
+    image: caddy:2-alpine
+    container_name: lunar-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data          # SSL certificates
+      - caddy-config:/config
+    networks:
+      - frontend
+    restart: unless-stopped
+
   ollama:
     image: ollama/ollama:latest
     container_name: lunar-ollama
@@ -28,8 +43,10 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: lunar-gateway
-    ports:
-      - "3100:3100"
+    # No ports exposed to host — only Caddy can reach it
+    environment:
+      - LUNAR_PORT=3100
+      - OLLAMA_URL=http://ollama:11434
     env_file:
       - .env
     volumes:
@@ -70,6 +87,8 @@ services:
 volumes:
   ollama-data:
   lunar-data:
+  caddy-data:
+  caddy-config:
 
 networks:
   frontend:

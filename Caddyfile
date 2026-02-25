@@ -1,0 +1,28 @@
+# Replace with your actual domain
+lunar.yourdomain.com {
+    # API endpoints
+    reverse_proxy /api/* gateway:3100
+    
+    # WebSocket
+    reverse_proxy /ws/* gateway:3100
+    
+    # Health check
+    reverse_proxy /health gateway:3100
+    
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+    
+    # Compression
+    encode gzip zstd
+    
+    # Logging
+    log {
+        output stdout
+        format json
+    }
+}
