@@ -1,6 +1,9 @@
 import { Ollama } from 'ollama';
 import type { LLMProvider, Message, ChatOptions, ChatResponse } from './types.js';
 
+/** Shared raw Ollama client — used by OllamaProvider and the agent runner */
+export const ollama = new Ollama({ host: 'http://localhost:11434' });
+
 /**
  * Ollama LLM Provider — runs AI locally on your Mac.
  *

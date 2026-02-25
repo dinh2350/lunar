@@ -1,76 +1,52 @@
 import * as readline from 'readline';
-import { OllamaProvider } from './llm/client.js';
 import type { Message } from './llm/types.js';
+import { runAgent } from './runner.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-// The AI provider
-const provider = new OllamaProvider();
-
 // Conversation history
 const messages: Message[] = [
   {
     role: 'system',
-    content: 'You are Lunar, a helpful personal assistant. Be concise and friendly.',
+    content: `You are Lunar, a helpful personal AI assistant.
+
+You have access to tools. Use them when appropriate:
+- get_current_datetime: for time/date questions
+- calculate: for ANY math (never do math in your head!)
+
+If the user asks for something you can't do, say so honestly.
+Be concise and friendly.`,
   },
 ];
 
-// Config
-let temperature = 0.7;
+// Runtime config
 let model = 'llama3.2';
-let useStreaming = true;
+let temperature = 0.7;
 
-/**
- * Chat with streaming — tokens appear word by word
- */
-async function chatWithStreaming(userInput: string): Promise<string> {
+async function chat(userInput: string): Promise<void> {
   messages.push({ role: 'user', content: userInput });
 
-  process.stdout.write('\nLunar: ');  // print prefix without newline
+  const result = await runAgent(messages, { model, temperature });
 
-  const response = await provider.chatStream(
-    messages,
-    (token) => {
-      process.stdout.write(token);  // ← each word appears immediately!
-    },
-    { model, temperature },
-  );
+  // Add assistant response to history
+  messages.push({ role: 'assistant', content: result.response });
 
-  process.stdout.write('\n\n');  // add newline after response
+  console.log(`\nLunar: ${result.response}`);
 
-  messages.push({ role: 'assistant', content: response.content });
-  return response.content;
+  // Show tool usage stats
+  if (result.toolCalls.length > 0) {
+    console.log(`  ⚡ ${result.toolCalls.length} tool call(s) in ${result.turns} turn(s)`);
+  }
+  console.log('');
 }
 
-/**
- * Chat without streaming — full response at once
- */
-async function chatWithoutStreaming(userInput: string): Promise<string> {
-  messages.push({ role: 'user', content: userInput });
-
-  console.log('Lunar is thinking...');
-  const response = await provider.chat(messages, { model, temperature });
-
-  console.log(`\nLunar: ${response.content}\n`);
-  messages.push({ role: 'assistant', content: response.content });
-  return response.content;
-}
-
-/**
- * Handle slash commands
- */
 function handleCommand(input: string): boolean {
   const [cmd, ...args] = input.split(' ');
 
   switch (cmd) {
-    case '/stream': {
-      useStreaming = !useStreaming;
-      console.log(`✅ Streaming: ${useStreaming ? 'ON' : 'OFF'}\n`);
-      return true;
-    }
     case '/temp': {
       const t = parseFloat(args[0]);
       if (!isNaN(t)) { temperature = t; console.log(`✅ Temperature: ${t}\n`); }
@@ -80,15 +56,6 @@ function handleCommand(input: string): boolean {
     case '/model': {
       if (args[0]) { model = args[0]; console.log(`✅ Model: ${model}\n`); }
       else console.log(`Current model: ${model}\n`);
-      return true;
-    }
-    case '/models': {
-      console.log(`
-Available models (run "ollama pull <name>" to download):
-  llama3.2        — 3B general purpose (recommended for 8GB Mac)
-  qwen2.5:3b      — 3B very fast, basic tasks
-  nomic-embed-text — embeddings (not for chat)
-      `);
       return true;
     }
     case '/history': {
@@ -102,26 +69,13 @@ Available models (run "ollama pull <name>" to download):
       console.log('🗑️  History cleared\n');
       return true;
     }
-    case '/system': {
-      const prompt = args.join(' ');
-      if (!prompt) {
-        console.log(`📋 System prompt: "${messages[0].content}"\n`);
-        return true;
-      }
-      messages[0] = { role: 'system', content: prompt };
-      console.log('✅ System prompt updated\n');
-      return true;
-    }
     case '/help': {
       console.log(`
 Commands:
-  /stream           Toggle streaming on/off
   /temp <0-2>       Set temperature
   /model <name>     Switch model
-  /models           List available models
   /history          Show conversation size
   /clear            Clear history
-  /system [text]    View or set system prompt
   /help             Show this
   exit              Quit
       `);
@@ -138,11 +92,7 @@ function ask(): void {
     if (input.startsWith('/')) { handleCommand(input); ask(); return; }
 
     try {
-      if (useStreaming) {
-        await chatWithStreaming(input);
-      } else {
-        await chatWithoutStreaming(input);
-      }
+      await chat(input);
     } catch (err: any) {
       console.error(`\n❌ ${err.message}\n`);
     }
@@ -150,9 +100,10 @@ function ask(): void {
   });
 }
 
-console.log('╔═══════════════════════════════════════╗');
-console.log('║  🌙 Lunar AI — v0.1 (streaming mode)  ║');
-console.log('║  Type /help for commands              ║');
-console.log('╚═══════════════════════════════════════╝\n');
+
+console.log('╔═════════════════════════════════════════╗');
+console.log('║  🌙 Lunar AI Agent — v0.2 (with tools)  ║');
+console.log('║  I can check the time and do math!      ║');
+console.log('╚═════════════════════════════════════════╝\n');
 
 ask();
