@@ -1,0 +1,92 @@
+# ============================================
+# Lunar AI Agent — Docker Compose
+# ============================================
+# Start everything: docker compose up
+# Stop everything:  docker compose down
+# Rebuild:          docker compose up --build
+
+services:
+  # ---- 1. Ollama (LLM Server) ----
+  ollama:
+    image: ollama/ollama:latest
+    container_name: lunar-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama    # persist downloaded models
+    deploy:
+      resources:
+        reservations:
+          memory: 4G    # LLMs need RAM
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---- 2. Lunar Gateway (Main Agent) ----
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lunar-gateway
+    ports:
+      - "3100:3100"
+    environment:
+      - LUNAR_PORT=3100
+      - LUNAR_AGENT=main
+      - LUNAR_MODEL=qwen2.5:3b
+      - OLLAMA_URL=http://ollama:11434
+      - EVAL_URL=http://eval:8000
+      - NODE_ENV=production
+    volumes:
+      - lunar-data:/home/lunar/.lunar
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3100/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ---- 3. Eval Service (Python) ----
+  eval:
+    build:
+      context: ./services/eval
+      dockerfile: Dockerfile
+    container_name: lunar-eval
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ---- 4. Model Puller (init container — runs once) ----
+  model-puller:
+    image: curlimages/curl:latest
+    container_name: lunar-model-puller
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "
+        echo 'Pulling models...' &&
+        curl -s http://ollama:11434/api/pull -d '{\"name\":\"qwen2.5:3b\"}' &&
+        curl -s http://ollama:11434/api/pull -d '{\"name\":\"nomic-embed-text\"}' &&
+        echo 'Models ready!'
+      "
+    restart: "no"
+
+volumes:
+  ollama-data:
+    name: lunar-ollama-data
+  lunar-data:
+    name: lunar-data
