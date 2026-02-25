@@ -1,0 +1,9 @@
+{
+  "name": "@lunar/mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@lunar/shared": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  }
+}
