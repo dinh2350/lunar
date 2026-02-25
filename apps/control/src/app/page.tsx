@@ -6,6 +6,7 @@ import { StreamingChat } from '@/components/streaming-chat';
 import { MemoryBrowser } from '@/components/memory-browser';
 import { SessionViewer } from '@/components/session-viewer';
 import { SettingsPanel } from '@/components/settings-panel';
+import { EvalDashboard } from '@/components/eval-dashboard';
 import { LiveMetrics } from '@/components/live-metrics';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -47,6 +48,7 @@ export default function Home() {
             <TabsTrigger value="memory">🧠 Memory</TabsTrigger>
             <TabsTrigger value="sessions">📋 Sessions</TabsTrigger>
             <TabsTrigger value="settings">⚙️ Settings</TabsTrigger>
+            <TabsTrigger value="eval">📊 Eval</TabsTrigger>
           </TabsList>
 
           <TabsContent value="chat" className="mt-4">
@@ -72,6 +74,12 @@ export default function Home() {
           <TabsContent value="settings" className="mt-4">
             <ErrorBoundary>
               <SettingsPanel />
+            </ErrorBoundary>
+          </TabsContent>
+
+          <TabsContent value="eval" className="mt-4">
+            <ErrorBoundary>
+              <EvalDashboard />
             </ErrorBoundary>
           </TabsContent>
         </Tabs>
