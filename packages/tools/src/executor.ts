@@ -3,13 +3,8 @@ import { datetimeTool, executeDatetime } from './datetime.js';
 import { calculatorTool, executeCalculator } from './calculator.js';
 import { bashTool, executeBash } from './bash.js';
 import { readFileTool, executeReadFile, listDirTool, executeListDir, writeFileTool, executeWriteFile } from './filesystem.js';
-
-/**
- * Tool Executor — the central hub that dispatches tool calls to the right handler.
- *
- * WHAT: Receives a tool name + arguments, runs the corresponding function, returns result
- * WHY:  Clean separation — AI decides WHAT to call, executor actually runs it
- */
+import { memorySearchTool, createMemorySearchExecutor } from './memory-search.js';
+import type { VectorStore } from '../../memory/src/store.js';
 
 // Registry: all available tools
 const tools: Map<string, {
@@ -17,13 +12,24 @@ const tools: Map<string, {
   execute: (args: any) => string | Promise<string>;
 }> = new Map();
 
-// Register all tools
+// Register core tools
 tools.set('get_current_datetime', { definition: datetimeTool, execute: executeDatetime });
 tools.set('calculate', { definition: calculatorTool, execute: executeCalculator });
 tools.set('bash', { definition: bashTool, execute: executeBash });
 tools.set('read_file', { definition: readFileTool, execute: executeReadFile });
 tools.set('list_directory', { definition: listDirTool, execute: executeListDir });
 tools.set('write_file', { definition: writeFileTool, execute: executeWriteFile });
+
+/**
+ * Initialize memory-dependent tools. Call once at startup with a VectorStore.
+ */
+export function initializeTools(store: VectorStore) {
+  const executeMemorySearch = createMemorySearchExecutor(store);
+  tools.set('memory_search', {
+    definition: memorySearchTool,
+    execute: (args: any) => executeMemorySearch(args).then(r => r.result),
+  });
+}
 
 /**
  * Get all tool definitions (to send to the AI)
