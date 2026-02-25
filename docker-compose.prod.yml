@@ -1,0 +1,77 @@
+# Production-grade Docker Compose
+# Usage: docker compose -f docker-compose.prod.yml up -d
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: lunar-ollama
+    # NO ports exposed (only accessible from backend network)
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lunar-gateway
+    ports:
+      - "3100:3100"
+    env_file:
+      - .env
+    volumes:
+      - lunar-data:/home/lunar/.lunar
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      ollama:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3100/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  eval:
+    build:
+      context: ./services/eval
+    container_name: lunar-eval
+    # NO ports exposed
+    env_file:
+      - .env
+    networks:
+      - backend
+    depends_on:
+      ollama:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+volumes:
+  ollama-data:
+  lunar-data:
+
+networks:
+  frontend:
+  backend:
+    internal: true
