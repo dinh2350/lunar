@@ -5,6 +5,7 @@ Called by Lunar (TypeScript) via HTTP to evaluate agent responses.
 from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
+from judge import judge_relevancy, judge_faithfulness, judge_helpfulness
 
 app = FastAPI(
     title="Lunar Eval Service",
@@ -115,3 +116,28 @@ async def evaluate_batch(requests: list[EvalRequest]) -> list[EvalResponse]:
         result = await evaluate_answer(req)
         results.append(result)
     return results
+
+@app.post("/eval/judge", response_model=EvalResponse)
+async def evaluate_with_judge(req: EvalRequest) -> EvalResponse:
+    """Evaluate using LLM-as-Judge (slower but smarter)."""
+    scores = []
+    
+    # Always run relevancy + helpfulness
+    relevancy = await judge_relevancy(req.question, req.answer)
+    scores.append(EvalScore(**relevancy))
+    
+    helpfulness = await judge_helpfulness(req.question, req.answer)
+    scores.append(EvalScore(**helpfulness))
+    
+    # Faithfulness only if context provided
+    if req.context:
+        faithfulness = await judge_faithfulness(req.question, req.answer, req.context)
+        scores.append(EvalScore(**faithfulness))
+    
+    overall = sum(s.score for s in scores) / len(scores)
+    
+    return EvalResponse(
+        scores=scores,
+        overall=round(overall, 3),
+        evaluated_at=datetime.now().isoformat(),
+    )
