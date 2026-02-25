@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Chat } from '@/components/chat';
 import { MemoryBrowser } from '@/components/memory-browser';
 import { SessionViewer } from '@/components/session-viewer';
+import { SettingsPanel } from '@/components/settings-panel';
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
             <TabsTrigger value="chat">💬 Chat</TabsTrigger>
             <TabsTrigger value="memory">🧠 Memory</TabsTrigger>
             <TabsTrigger value="sessions">📋 Sessions</TabsTrigger>
+            <TabsTrigger value="settings">⚙️ Settings</TabsTrigger>
           </TabsList>
           
           <TabsContent value="chat" className="mt-4">
@@ -28,6 +30,10 @@ export default function Home() {
           
           <TabsContent value="sessions" className="mt-4">
             <SessionViewer />
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-4">
+            <SettingsPanel />
           </TabsContent>
         </Tabs>
       </main>
