@@ -1,0 +1,11 @@
+{
+  "name": "@lunar/mcp-server",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "lunar-mcp-server": "src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  }
+}

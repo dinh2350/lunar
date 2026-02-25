@@ -64,6 +64,12 @@ importers:
         specifier: ^1.12.1
         version: 1.27.1(zod@4.3.6)
 
+  packages/mcp-server:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.12.1
+        version: 1.27.1(zod@4.3.6)
+
   packages/memory:
     dependencies:
       better-sqlite3:
