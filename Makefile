@@ -42,6 +42,17 @@ test:  ## Run unit tests
 eval:  ## Run AI evaluation suite
 	./scripts/eval.sh
 
+golden-gate:  ## Run golden gate (critical tests only)
+	cd services/eval && python golden_gate.py
+
+eval-full:  ## Full eval (all tests + regression + metrics)
+	cd services/eval && python runner.py --all
+	cd services/eval && python regression.py
+
+deploy: golden-gate  ## Deploy only if golden gate passes
+	@echo "Golden gate passed! Deploying..."
+	docker compose -f docker-compose.prod.yml up -d --build
+
 # ---- Utilities ----
 
 logs:  ## Follow all logs
