@@ -2,6 +2,10 @@
 
 > 🎯 **DAY GOAL:** Run your first QLoRA fine-tuning job using Unsloth — 2x faster than standard training, fits on consumer GPU
 
+> ⚠️ **M1 8GB Mac Users:** Fine-tuning requires a GPU with 6GB+ VRAM. You CANNOT run this locally on M1 8GB.
+> **Solution:** Use **Google Colab (free T4 GPU)** — all code below runs perfectly in Colab.
+> Upload the script, run in Colab, download the result, then import into Ollama locally.
+
 ---
 
 ## 📚 CONCEPT 1: Unsloth — Why It's the Best Free Option
@@ -34,7 +38,7 @@ SUPPORTED MODELS:
 LUNAR FINE-TUNING PATH:
   1. No GPU?    → Use Google Colab (free T4 GPU)
   2. Have GPU?  → Run locally with Unsloth
-  3. M1/M2 Mac? → Use MLX (alternative, Day 64)
+  3. M1/M2 Mac? → Use Google Colab (free T4 GPU) — recommended path
 
 WHAT WE'LL TRAIN:
   Base model:  Llama 3.2 3B (fits in 4 GB VRAM with Q4)

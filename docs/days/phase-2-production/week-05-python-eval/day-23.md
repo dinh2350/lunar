@@ -191,7 +191,7 @@ import re
 from prompts import RELEVANCY_PROMPT, FAITHFULNESS_PROMPT, HELPFULNESS_PROMPT
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
-JUDGE_MODEL = "qwen2.5:7b"  # Same model, but could use a different one
+JUDGE_MODEL = "qwen2.5:3b"  # Same model, but could use a different one
 
 async def call_judge(prompt: str) -> dict:
     """Send a prompt to the LLM judge and parse JSON response."""

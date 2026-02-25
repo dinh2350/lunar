@@ -24,7 +24,7 @@ LLM sees: [15496, 11, 1268, 527, 499, 30]
 
 1. **Context window limit:** LLMs can only process a fixed number of tokens at once.
    ```
-   llama3.3  → 128,000 tokens  (~100 pages of text)
+   llama3.2  → 128,000 tokens  (~100 pages of text)
    qwen2.5   → 32,000 tokens   (~25 pages)
    
    If your conversation exceeds this → the AI forgets old messages!
@@ -90,7 +90,7 @@ Tokens are like **request body size limits** in Express:
 app.use(express.json({ limit: '1mb' }));  // max ~1MB per request
 
 // LLMs have a token limit:
-ollama.chat({ model: 'llama3.3' });  // max 128,000 tokens per request
+ollama.chat({ model: 'llama3.2' });  // max 128,000 tokens per request
 
 // Both: if you exceed the limit → error or data gets cut off
 ```
@@ -277,7 +277,7 @@ export interface LLMConfig {
 
 /** Default config — good for general conversation */
 const DEFAULT_CONFIG: LLMConfig = {
-  model: 'llama3.3',
+  model: 'llama3.2',
   temperature: 0.7,
   maxTokens: 2048,
 };
@@ -384,7 +384,7 @@ function handleCommand(input: string): boolean {
     case '/model': {
       const model = parts[1];
       if (!model) {
-        console.log('Usage: /model <name>  (e.g., /model qwen2.5:7b)\n');
+        console.log('Usage: /model <name>  (e.g., /model qwen2.5:3b)\n');
         return true;
       }
       currentConfig.model = model;
@@ -425,7 +425,7 @@ function handleCommand(input: string): boolean {
     }
 
     case '/config': {
-      console.log('Current config:', { ...{ model: 'llama3.3', temperature: 0.7, maxTokens: 2048 }, ...currentConfig });
+      console.log('Current config:', { ...{ model: 'llama3.2', temperature: 0.7, maxTokens: 2048 }, ...currentConfig });
       console.log(`System prompt: "${currentSystemPrompt}"\n`);
       return true;
     }
@@ -434,7 +434,7 @@ function handleCommand(input: string): boolean {
       console.log(`
 Available commands:
   /temp <0-2>                Set temperature (0=precise, 1=creative)
-  /model <name>              Switch AI model (e.g., qwen2.5:7b)
+  /model <name>              Switch AI model (e.g., qwen2.5:3b)
   /preset <code|creative|factual>  Use preconfigured settings
   /system <prompt>           Change system prompt
   /config                    Show current settings

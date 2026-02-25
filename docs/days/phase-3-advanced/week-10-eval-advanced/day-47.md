@@ -123,9 +123,9 @@ MODEL_AB_TEST = ABTest(
     name="Qwen 2.5 7B vs Gemma 2 9B",
     hypothesis="Gemma 2 will be better at conversation but worse at tool usage",
     variant_a=Variant(
-        name="qwen2.5:7b",
+        name="qwen2.5:3b",
         description="Default Qwen model",
-        config={"model": "qwen2.5:7b"}
+        config={"model": "qwen2.5:3b"}
     ),
     variant_b=Variant(
         name="gemma2:9b",

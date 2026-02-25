@@ -156,7 +156,7 @@ services:
     environment:
       - LUNAR_PORT=3100
       - LUNAR_AGENT=main
-      - LUNAR_MODEL=qwen2.5:7b
+      - LUNAR_MODEL=qwen2.5:3b
       - OLLAMA_URL=http://ollama:11434    # ← service name!
       - EVAL_URL=http://eval:8000         # ← service name!
       - NODE_ENV=production
@@ -200,7 +200,7 @@ services:
     entrypoint: >
       sh -c "
         echo 'Pulling models...' &&
-        curl -s http://ollama:11434/api/pull -d '{\"name\":\"qwen2.5:7b\"}' &&
+        curl -s http://ollama:11434/api/pull -d '{\"name\":\"qwen2.5:3b\"}' &&
         curl -s http://ollama:11434/api/pull -d '{\"name\":\"nomic-embed-text\"}' &&
         echo 'Models ready!'
       "

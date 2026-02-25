@@ -57,7 +57,7 @@ WITH history (message array):
 │    { role: 'user',   content: 'What is Node.js?' },      │
 │  ];                                                      │
 │                                                          │
-│  ollama.chat({ model: 'llama3.3', messages })            │
+│  ollama.chat({ model: 'llama3.2', messages })            │
 │         │                                                │
 └─────────┼────────────────────────────────────────────────┘
           │
@@ -66,7 +66,7 @@ WITH history (message array):
 │                                                          │
 │  1. Receive messages array                               │
 │  2. Convert text → tokens (numbers)                      │
-│  3. Feed through llama3.3 neural network                 │
+│  3. Feed through llama3.2 neural network                 │
 │  4. Generate response token by token                     │
 │  5. Convert tokens → text                                │
 │  6. Return: { role: 'assistant', content: '...' }        │
@@ -88,7 +88,7 @@ const data = await weather.json();
 const ai = await fetch('http://localhost:11434/api/chat', {
   method: 'POST',
   body: JSON.stringify({
-    model: 'llama3.3',
+    model: 'llama3.2',
     messages: [{ role: 'user', content: 'Hello!' }]
   })
 });
@@ -189,13 +189,13 @@ The `ollama` npm package is a **TypeScript/JavaScript client** that wraps the Ol
 // WITHOUT the npm package (manual fetch):
 const res = await fetch('http://localhost:11434/api/chat', {
   method: 'POST',
-  body: JSON.stringify({ model: 'llama3.3', messages: [...] })
+  body: JSON.stringify({ model: 'llama3.2', messages: [...] })
 });
 
 // WITH the npm package (clean and typed):
 import { Ollama } from 'ollama';
 const ollama = new Ollama({ host: 'http://localhost:11434' });
-const res = await ollama.chat({ model: 'llama3.3', messages: [...] });
+const res = await ollama.chat({ model: 'llama3.2', messages: [...] });
 ```
 
 ### WHY — Why Use the npm Package?
@@ -261,7 +261,7 @@ export const ollama = new Ollama({
  */
 export async function chat(userMessage: string): Promise<string> {
   const response = await ollama.chat({
-    model: 'llama3.3',        // which AI model to use
+    model: 'llama3.2',        // which AI model to use
     messages: [
       {
         role: 'system',       // developer instructions (hidden from user)
@@ -283,7 +283,7 @@ export async function chat(userMessage: string): Promise<string> {
 ```
 new Ollama({ host: '...' })     → connect to Ollama (like mongoose.connect())
 ollama.chat({ model, messages }) → send messages, get response (like db.find())
-model: 'llama3.3'               → which AI brain to use (like choosing a database)
+model: 'llama3.2'               → which AI brain to use (like choosing a database)
 messages: [...]                  → the conversation so far
 response.message.content         → the AI's text reply
 ```
@@ -398,7 +398,7 @@ What happened when you typed "Hello!":
    - Created messages array: [system prompt, your message]
    - Called ollama.chat() — HTTP POST to localhost:11434
 4. Ollama server:
-   - Loaded llama3.3 model into RAM
+   - Loaded llama3.2 model into RAM
    - Converted "Hello!" to tokens
    - Ran tokens through the neural network
    - Generated response tokens one by one

@@ -18,7 +18,7 @@
 │  🤖 MODEL CONFIGURATION                         │
 │  ─────────────────────                           │
 │  Provider: [Ollama     ▾]                        │
-│  Model:    [qwen2.5:7b ▾]  ← dropdown of avail │
+│  Model:    [qwen2.5:3b ▾]  ← dropdown of avail │
 │  Temp:     [====●=======] 0.7                    │
 │  Max Tok:  [========●===] 4096                   │
 │                                                  │

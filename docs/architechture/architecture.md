@@ -50,7 +50,7 @@ All components selected are either **self-hosted open-source** or **free-tier** 
 
 | Provider | Free Tier | Model Examples | Notes |
 |---|---|---|---|
-| **Ollama** (self-hosted) | Unlimited (local) | Llama 3.3, Qwen2.5, Mistral, Gemma3, DeepSeek-R1 | Primary; runs on user's machine |
+| **Ollama** (self-hosted) | Unlimited (local) | Llama 3.2, Qwen2.5, Gemma3, DeepSeek-R1 | Primary; runs on user's machine (use 3B models on 8GB Mac) |
 | **Google Gemini** | 15 RPM / 1M tokens/day | gemini-2.0-flash, gemini-1.5-flash | Best free cloud fallback |
 | **Groq** | 14,400 req/day | llama-3.3-70b, mixtral-8x7b | Fast inference, generous free tier |
 | **OpenRouter** | Some free models | deepseek, qwen, llama (free tag) | Aggregator with free model access |
@@ -691,8 +691,8 @@ CREATE TABLE embedding_cache (
 
   // LLM providers
   models: {
-    default: "ollama/llama3.3",      // FREE: local Ollama
-    vision:  "ollama/llava:13b",     // vision model for image analysis
+    default: "ollama/llama3.2",      // FREE: local Ollama
+    vision:  "gemini/gemini-2.0-flash",  // vision via Gemini free tier (llava:7b local alternative)
     providers: {
       ollama:     { baseUrl: "http://localhost:11434" },
       gemini:     { apiKey: "..." },  // free tier
@@ -822,13 +822,15 @@ User message arrives
 
 ### 5.2 Recommended Local Models (Ollama)
 
-| Use Case | Model | Size | Quality |
-|---|---|---|---|
-| General assistant | `llama3.3:70b-instruct-q4` | ~40 GB | Excellent |
-| Low-RAM machines | `qwen2.5:7b-instruct` | ~4 GB | Good |
-| Fast responses | `gemma3:4b-it` | ~2.5 GB | Acceptable |
-| Coding tasks | `qwen2.5-coder:7b` | ~4 GB | Excellent for code |
-| Tool use | `mistral:7b-instruct` | ~4 GB | Good tool calling |
+> **⚠️ M1 8GB Mac:** Use 1B-3B models only. 7B models may load but will be slow with memory pressure.
+
+| Use Case | Model | Size | Quality | 8GB Mac? |
+|---|---|---|---|---|
+| General assistant | `llama3.2` (3B) | ~2 GB | Good | ✅ Best fit |
+| Fast & small | `qwen2.5:3b` | ~2 GB | Good | ✅ |
+| Even faster | `gemma3:1b` | ~1 GB | Acceptable | ✅ Very fast |
+| Coding tasks | `qwen2.5-coder:3b` | ~2 GB | Good for code | ✅ |
+| High quality (cloud) | Groq `llama-3.3-70b` | 0 (remote) | Excellent | ✅ Free API |
 
 ### 5.3 Embedding Models (Ranked by Quality/Cost)
 
@@ -1036,9 +1038,9 @@ systemctl --user start lunar
 curl -fsSL https://ollama.ai/install.sh | sh
 
 # Pull recommended models
-ollama pull llama3.3          # general purpose
+ollama pull llama3.2          # general purpose
 ollama pull nomic-embed-text  # embeddings for memory search
-ollama pull qwen2.5:7b        # lighter model for low-RAM machines
+# ollama pull qwen2.5:3b      # optional second model (also ~2GB)
 ```
 
 ### 8.4 Remote Access (Zero Cost Options)
@@ -1369,8 +1371,8 @@ if (message.media?.some(m => m.type === 'image')) {
 **Config addition:**
 ```json5
 models: {
-  vision: "ollama/llava:13b",  // ADD: dedicated vision model
-  // or: "gemini/gemini-2.0-flash"  (vision on free tier)
+  vision: "gemini/gemini-2.0-flash",  // Vision via Gemini free tier (best for 8GB Mac)
+  // or: "ollama/llava:7b"  (local alternative, ~4GB RAM)
 }
 ```
 

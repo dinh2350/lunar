@@ -266,7 +266,7 @@ export default function Home() {
             <div className="space-y-1 text-sm">
               <div>❤️ Gateway: <span className="text-green-500">UP</span></div>
               <div>🤖 Ollama: <span className="text-green-500">UP</span></div>
-              <div>📊 Model: qwen2.5:7b</div>
+              <div>📊 Model: qwen2.5:3b</div>
             </div>
           </div>
           

@@ -245,7 +245,7 @@ export async function runAgent(
 
     // Step 1: Send everything to the AI
     const response = await ollama.chat({
-      model: options?.model ?? 'llama3.3',
+      model: options?.model ?? 'llama3.2',
       messages,
       tools,  // ← tell AI what tools are available
       options: {

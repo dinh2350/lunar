@@ -2,6 +2,9 @@
 
 > 🎯 **DAY GOAL:** Add image creation capabilities to Lunar — generate images from text prompts using free/local tools
 
+> ⚠️ **M1 8GB Mac Users:** Local Stable Diffusion/ComfyUI needs 8GB+ VRAM and dedicated GPU.
+> **Your path:** Use **Pollinations.ai** (free, no key) or **Gemini Imagen** (free tier). Skip the ComfyUI section.
+
 ---
 
 ## 📚 CONCEPT 1: Image Generation Options
@@ -23,9 +26,9 @@ IMAGE GENERATION MODELS:
 * Gemini free tier includes limited image generation
 
 FOR LUNAR (zero-cost):
-  Option 1: Pollinations.ai — Completely free API, no key needed
-  Option 2: Stable Diffusion via ComfyUI — Local, free, needs GPU
-  Option 3: Gemini Imagen — Free tier
+  Option 1: Pollinations.ai — Completely free API, no key needed ← BEST for 8GB Mac
+  Option 2: Stable Diffusion via ComfyUI — Local, free, needs GPU (skip on 8GB Mac)
+  Option 3: Gemini Imagen — Free tier ← GOOD alternative
 ```
 
 ---

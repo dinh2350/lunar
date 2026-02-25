@@ -346,7 +346,7 @@ When asked to code, use TypeScript.`,
 ];
 
 // Config
-let model = 'llama3.3';
+let model = 'llama3.2';
 let temperature = 0.7;
 
 /**

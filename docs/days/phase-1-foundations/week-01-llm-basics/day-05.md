@@ -93,7 +93,7 @@ stream.on('data', (chunk) => {
 // ↑ prints immediately as data arrives — same total time, better UX
 
 // LLM streaming is the EXACT same pattern:
-const stream = await ollama.chat({ model: 'llama3.3', messages, stream: true });
+const stream = await ollama.chat({ model: 'llama3.2', messages, stream: true });
 for await (const chunk of stream) {
   process.stdout.write(chunk.message.content);  // prints each token
 }
@@ -111,18 +111,18 @@ You already know `ReadableStream`, `EventEmitter`, `for await`. LLM streaming us
 
 ```
 Models are like databases:
-  PostgreSQL = reliable, good at everything → llama3.3
+  PostgreSQL = reliable, good at everything → llama3.2
   Redis = super fast, limited features     → qwen2.5:3b
-  MongoDB = flexible, good for documents   → gemma2:27b
+  MongoDB = flexible, good for documents   → gemma2:9b
 ```
 
 ### WHY — Why Use Multiple Models?
 
 | Situation | Best Choice | Why |
 |---|---|---|
-| General conversation | llama3.3 (8B) | Best balance of quality and speed |
+| General conversation | llama3.2 (3B) | Best balance of quality and speed |
 | Fast simple answers | qwen2.5:3b | Small, fast, good enough for simple tasks |
-| Need highest quality | llama3.3 (70B) or cloud API | Best reasoning, but slow/expensive |
+| Need highest quality | Gemini or Groq (cloud, free) | Best reasoning, no local RAM cost |
 | Embeddings (search) | nomic-embed-text | Designed specifically for embeddings |
 | Code generation | codestral or deepseek-coder | Trained specifically on code |
 
@@ -136,13 +136,13 @@ Request comes in
     ▼
 ┌─────────────────┐
 │ Try Ollama (local) │ ← Free, private, no internet needed
-│ llama3.3        │
-└────────┬────────┘
+│ llama3.2        │
+└────────┼────────┘
          │ If fails (too slow, error, model not loaded)
          ▼
 ┌─────────────────┐
 │ Try Groq (cloud) │ ← Free tier, VERY fast (300 tokens/sec)
-│ llama3.3-70b    │
+│ llama-3.3-70b   │
 └────────┬────────┘
          │ If fails (rate limit, network error)
          ▼
@@ -160,21 +160,21 @@ Request comes in
 
 ### HOW — How Model Sizes Work
 
-Model names often include a size: `llama3.3:8b`, `qwen2.5:7b`, `llama3.3:70b`
+Model names often include a size: `llama3.2:3b`, `qwen2.5:3b`, `gemma2:9b`
 
 ```
 "b" = billions of parameters (the "brain cells" of the model)
 
-1b-3b   = Small   → fast, basic tasks, fits in 2GB RAM
-7b-8b   = Medium  → good balance, fits in 4-6GB RAM ← SWEET SPOT for local
+1b-3b   = Small   → fast, basic tasks, fits in 2GB RAM ← BEST for 8GB Mac
+7b-8b   = Medium  → good balance, fits in 4-6GB RAM (tight on 8GB)
 13b     = Large   → better quality, needs 8GB+ RAM
 30b-70b = XL      → near-GPT-4 quality, needs 40GB+ RAM or cloud
 ```
 
 **Rule of thumb for your Mac:**
 ```
-8GB RAM Mac  → use 3b-8b models
-16GB RAM Mac → use 8b-13b models
+8GB RAM Mac  → use 1b-3b models (NEVER 13b+, 7b is possible but slow)
+16GB RAM Mac → use 7b-13b models
 32GB+ RAM    → use up to 30b models
 ```
 
@@ -185,8 +185,8 @@ Multiple models = choosing the right npm package for the job:
 ```typescript
 // Like choosing between lightweight vs full-featured:
 // express (small, fast)      ↔ qwen2.5:3b (small, fast)
-// fastify (balanced)         ↔ llama3.3:8b (balanced)
-// nest.js (feature-rich)     ↔ llama3.3:70b (high quality)
+// fastify (balanced)         ↔ llama3.2:3b (balanced)
+// nest.js (feature-rich)     ↔ Groq/Gemini cloud (high quality)
 
 // And using fallbacks:
 // Like trying Redis cache first, then PostgreSQL:
@@ -219,7 +219,7 @@ Without an interface, switching models means changing code everywhere:
 ```typescript
 // BAD: tightly coupled to Ollama
 if (provider === 'ollama') {
-  response = await ollamaClient.chat({ model: 'llama3.3', messages });
+  response = await ollamaClient.chat({ model: 'llama3.2', messages });
 } else if (provider === 'groq') {
   response = await groqClient.createChatCompletion({ model: 'llama3', messages });
 } else if (provider === 'gemini') {
@@ -325,7 +325,7 @@ export class OllamaProvider implements LLMProvider {
   private client: Ollama;
   private defaultModel: string;
 
-  constructor(host = 'http://localhost:11434', defaultModel = 'llama3.3') {
+  constructor(host = 'http://localhost:11434', defaultModel = 'llama3.2') {
     this.client = new Ollama({ host });
     this.defaultModel = defaultModel;
   }
@@ -430,7 +430,7 @@ const messages: Message[] = [
 
 // Config
 let temperature = 0.7;
-let model = 'llama3.3';
+let model = 'llama3.2';
 let useStreaming = true;
 
 /**
@@ -494,8 +494,8 @@ function handleCommand(input: string): boolean {
     case '/models': {
       console.log(`
 Available models (run "ollama pull <name>" to download):
-  llama3.3        — 8B general purpose (recommended)
-  qwen2.5:7b      — 7B fast and capable
+  llama3.2        — 3B general purpose (recommended for 8GB Mac)
+  qwen2.5:3b      — 7B fast and capable
   qwen2.5:3b      — 3B very fast, basic tasks
   codestral       — specialized for code
   nomic-embed-text — embeddings (not for chat)
@@ -583,9 +583,9 @@ ollama pull qwen2.5:3b
 ```
 
 ```
-/model llama3.3
+/model llama3.2
 You: Explain closures in JavaScript
-Lunar: [detailed, high-quality explanation — takes ~5 seconds]
+Lunar: [detailed, high-quality explanation — takes ~3 seconds]
 
 /model qwen2.5:3b
 You: Explain closures in JavaScript
@@ -624,8 +624,8 @@ Lunar: [shorter, simpler explanation — takes ~1 second]
 3. **What is the benefit of using an LLMProvider interface instead of calling Ollama directly?**
    <details><summary>Answer</summary>You can add new providers (Groq, Gemini, OpenAI) by implementing the same interface, without changing any code that calls `provider.chat()`. It also makes testing easier — you can create a mock provider for unit tests.</details>
 
-4. **If llama3.3 (8b) takes 5 seconds and qwen2.5 (3b) takes 1 second for the same question, which should you use?**
-   <details><summary>Answer</summary>Depends on the task. For simple Q&A or quick tasks → qwen2.5:3b (faster). For complex reasoning, code, or when quality matters → llama3.3:8b. You might even use both: fast model for simple queries, big model for complex ones.</details>
+4. **If llama3.2 (3b) takes 2 seconds and qwen2.5:3b takes 1 second for the same question, which should you use?**
+   <details><summary>Answer</summary>Depends on the task. For simple Q&A or quick tasks → qwen2.5:3b (faster). For complex reasoning, code, or when quality matters → llama3.2. For the hardest tasks → use free cloud APIs (Gemini, Groq) which run much larger models.</details>
 
 5. **What does `process.stdout.write()` do differently from `console.log()`?**
    <details><summary>Answer</summary>`process.stdout.write()` prints text WITHOUT adding a newline at the end. `console.log()` always adds a newline. For streaming, we need `write()` so tokens appear on the same line.</details>

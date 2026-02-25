@@ -122,10 +122,17 @@ Like: if package.json didn't change, skip pnpm install
 
 ### Step 1: Install Docker (5 minutes)
 
+> **⚠️ M1 8GB Mac Tip:** Docker Desktop uses ~1-2GB RAM. Consider **OrbStack** instead
+> (`brew install --cask orbstack`) — it's 3-5x lighter on memory and faster on Apple Silicon.
+> OrbStack is a drop-in Docker Desktop replacement. All `docker` commands work the same.
+
 ```bash
-# macOS
+# macOS — Option A: Docker Desktop
 brew install --cask docker
 # Then open Docker Desktop app
+
+# macOS — Option B: OrbStack (recommended for 8GB Mac)
+brew install --cask orbstack
 
 # Verify
 docker --version

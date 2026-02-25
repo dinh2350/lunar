@@ -196,7 +196,7 @@ Create `.env` (add to `.gitignore`!):
 # Lunar Configuration
 LUNAR_PORT=3100
 LUNAR_AGENT=main
-LUNAR_MODEL=qwen2.5:7b
+LUNAR_MODEL=qwen2.5:3b
 
 # Ollama
 OLLAMA_URL=http://ollama:11434

@@ -634,7 +634,7 @@ STEP 5: Top 5 results → injected into AI context
 **Prerequisites:**
 - ✅ You know Node.js and TypeScript (you already have this)
 - ✅ Install [Ollama](https://ollama.com) (free local AI — just download and install)
-- ✅ Run: `ollama pull llama3.3` and `ollama pull nomic-embed-text`
+- ✅ Run: `ollama pull llama3.2` and `ollama pull nomic-embed-text`
 - ✅ Have your IDE ready (VS Code recommended)
 
 **Time commitment:** ~20-25 hours/week. If you can only do 10-15 hours, double the week count.
@@ -661,7 +661,7 @@ const ollama = new Ollama({ host: 'http://localhost:11434' });
 
 async function chat(userMessage: string): Promise<string> {
   const response = await ollama.chat({
-    model: 'llama3.3',
+    model: 'llama3.2',
     messages: [
       { role: 'system', content: 'You are Lunar, a helpful personal assistant.' },
       { role: 'user', content: userMessage }
@@ -757,7 +757,7 @@ async function runAgent(userMessage: string): Promise<string> {
 
   while (true) {
     const response = await ollama.chat({
-      model: 'llama3.3',
+      model: 'llama3.2',
       messages,
       tools,  // ← tell the AI what tools are available
     });
@@ -1344,7 +1344,7 @@ import ollama  # pip install ollama
 def chat(message: str) -> str:
     """Send a message to an LLM and get a response."""
     response = ollama.chat(
-        model='llama3.3',
+        model='llama3.2',
         messages=[
             {'role': 'system', 'content': 'You are a helpful assistant.'},
             {'role': 'user', 'content': message}
@@ -1417,7 +1417,7 @@ console.log(response);  // entire response appears at once
 
 // WITH streaming (much better UX):
 const stream = await ollama.chat({
-  model: 'llama3.3',
+  model: 'llama3.2',
   messages,
   stream: true,  // ← this is the key
 });

@@ -147,7 +147,7 @@ const config: LunarConfig = {
   agentId: process.env.LUNAR_AGENT || 'main',
   llm: {
     provider: 'ollama',
-    model: process.env.LUNAR_MODEL || 'qwen2.5:7b',
+    model: process.env.LUNAR_MODEL || 'qwen2.5:3b',
     baseUrl: process.env.OLLAMA_URL || 'http://localhost:11434',
   },
   workspace: path.join(
@@ -322,7 +322,7 @@ pnpm dev
 
 # Test health endpoint
 curl http://localhost:3100/api/health
-# {"status":"ok","agent":"main","model":"qwen2.5:7b","uptime":5.2}
+# {"status":"ok","agent":"main","model":"qwen2.5:3b","uptime":5.2}
 
 # Test HTTP chat
 curl -X POST http://localhost:3100/api/chat \

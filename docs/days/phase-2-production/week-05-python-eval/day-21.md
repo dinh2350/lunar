@@ -166,7 +166,7 @@ print(f"total: {total}")       # 15
 # ---- Dicts (= objects) ----
 agent = {
     "name": "Lunar",
-    "model": "qwen2.5:7b",
+    "model": "qwen2.5:3b",
     "tools": ["memory_search", "bash"],
 }
 

@@ -91,7 +91,7 @@ Trigger: push to main or PR
   │
   └── Job 2: AI Eval (after Job 1 passes)
       ├── Start Ollama
-      ├── Pull model (qwen2.5:7b)
+      ├── Pull model (qwen2.5:3b)
       ├── Start Lunar gateway
       ├── Start eval service
       ├── Run eval dataset
@@ -235,7 +235,7 @@ jobs:
           curl -fsSL https://ollama.com/install.sh | sh
           ollama serve &
           sleep 5
-          ollama pull qwen2.5:7b
+          ollama pull qwen2.5:3b
 
       # Install dependencies
       - name: Install Node dependencies

@@ -201,7 +201,7 @@ Rules:
 - Include error handling
 - Explain your code briefly`,
     tools: ['read_file', 'write_file', 'bash_exec', 'memory_search'],
-    model: 'qwen2.5-coder:7b',  // Use code-specialized model
+    model: 'qwen2.5-coder:3b',  // Use code-specialized model
     temperature: 0.3,
   },
   {
@@ -289,7 +289,7 @@ export class CoordinatorAgent {
     ).join('\n');
 
     const response = await this.llm.chat({
-      model: 'qwen2.5:7b',
+      model: 'qwen2.5:3b',
       messages: [
         {
           role: 'system',
@@ -409,7 +409,7 @@ Rules:
 
     // Run with the agent's specific configuration
     const response = await this.llm.chat({
-      model: agent.model || 'qwen2.5:7b',
+      model: agent.model || 'qwen2.5:3b',
       messages: [
         { role: 'system', content: agent.systemPrompt },
         { role: 'user', content: instruction },
@@ -435,7 +435,7 @@ Rules:
       .join('\n\n');
 
     const summary = await this.llm.chat({
-      model: 'qwen2.5:7b',
+      model: 'qwen2.5:3b',
       messages: [{
         role: 'system',
         content: 'Combine the following specialist reports into a coherent summary.',

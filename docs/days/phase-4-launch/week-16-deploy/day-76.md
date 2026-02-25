@@ -57,11 +57,13 @@ services:
     image: ollama/ollama:latest
     volumes:
       - ollama_models:/root/.ollama
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]  # GPU passthrough
+    # GPU passthrough — only on Linux with NVIDIA GPU
+    # On M1 Mac: remove the 'deploy' block, Ollama uses CPU/Metal natively
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - capabilities: [gpu]
     restart: unless-stopped
 
 volumes:
@@ -118,7 +120,7 @@ lunar.yourdomain.com {
 
 - [ ] Multi-stage Dockerfile (build + production)
 - [ ] Docker Compose with Caddy, Agent, UI, Ollama
-- [ ] GPU passthrough for Ollama
+- [ ] GPU passthrough for Ollama (Linux with NVIDIA GPU only — skip on M1 Mac)
 - [ ] Auto HTTPS with Caddy
 - [ ] Persistent volumes for data + models
 - [ ] Resource limits configured

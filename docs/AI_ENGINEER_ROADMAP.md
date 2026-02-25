@@ -602,7 +602,7 @@ Add vision + audio capabilities to Lunar:
 
 ```typescript
 // packages/agent/src/multimodal/
-├── vision.ts        ← image understanding (already have ollama/llava)
+├── vision.ts        ← image understanding (Gemini free tier, or ollama/llava:7b)
 ├── audio.ts         ← speech-to-text (Whisper via Ollama or local)
 ├── tts.ts           ← text-to-speech (Piper TTS, free + local)
 └── document.ts      ← PDF/document parsing for RAG

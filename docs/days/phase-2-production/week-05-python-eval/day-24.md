@@ -43,7 +43,7 @@ Without eval dataset:
 With eval dataset:
   ✅ Run after every change: "Score went from 0.78 → 0.83"
   ✅ Catch regressions: "Memory queries dropped from 0.9 → 0.4!"
-  ✅ Compare models: "qwen2.5:7b scores 0.82, llama3.2 scores 0.79"
+  ✅ Compare models: "qwen2.5:3b scores 0.82, llama3.2 scores 0.79"
   ✅ In interviews: "I built automated eval with LLM-as-Judge"
 ```
 

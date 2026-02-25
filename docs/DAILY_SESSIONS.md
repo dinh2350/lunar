@@ -47,12 +47,12 @@ Each day has 4 sections:
 - Install Ollama: download from [ollama.com](https://ollama.com)
 - Pull your first models:
   ```bash
-  ollama pull llama3.3          # main chat model (~4GB)
+  ollama pull llama3.2          # main chat model (~2GB)
   ollama pull nomic-embed-text  # embedding model (~270MB)
   ```
 - Test Ollama works:
   ```bash
-  ollama run llama3.3 "What is the capital of Vietnam?"
+  ollama run llama3.2 "What is the capital of Vietnam?"
   # Should respond: "The capital of Vietnam is Hanoi."
   ```
 - Set up the Lunar monorepo:
@@ -72,7 +72,7 @@ Each day has 4 sections:
 
 ✅ **ACHIEVE**
 - Ollama installed and running
-- `ollama run llama3.3` gives intelligent responses
+- `ollama run llama3.2` gives intelligent responses
 - Lunar monorepo folder structure created
 - TypeScript configured
 
@@ -102,7 +102,7 @@ Each day has 4 sections:
   
   export async function chat(userMessage: string): Promise<string> {
     const response = await ollama.chat({
-      model: 'llama3.3',
+      model: 'llama3.2',
       messages: [
         { role: 'system', content: 'You are Lunar, a helpful personal assistant.' },
         { role: 'user', content: userMessage }
@@ -150,13 +150,13 @@ Each day has 4 sections:
 - Experiment in terminal:
   ```bash
   # Temperature 0 (deterministic — same answer every time):
-  ollama run llama3.3 "Give me a random number" --temperature 0
-  ollama run llama3.3 "Give me a random number" --temperature 0
+  ollama run llama3.2 "Give me a random number" --temperature 0
+  ollama run llama3.2 "Give me a random number" --temperature 0
   # → Same answer both times!
   
   # Temperature 1 (creative — different each time):
-  ollama run llama3.3 "Give me a random number" --temperature 1
-  ollama run llama3.3 "Give me a random number" --temperature 1
+  ollama run llama3.2 "Give me a random number" --temperature 1
+  ollama run llama3.2 "Give me a random number" --temperature 1
   # → Different answers!
   ```
 
@@ -171,7 +171,7 @@ Each day has 4 sections:
   }
   
   const DEFAULT_CONFIG: LLMConfig = {
-    model: 'llama3.3',
+    model: 'llama3.2',
     temperature: 0.7,
     maxTokens: 2048,
   };
@@ -199,7 +199,7 @@ Each day has 4 sections:
 - Update CLI to support `/temp` and `/model` commands:
   - `/temp 0` — set temperature to 0
   - `/temp 1` — set temperature to 1
-  - `/model qwen2.5:7b` — switch model
+  - `/model qwen2.5:3b` — switch model
 - Test: Ask the same question at temperature 0 vs 1 — observe the difference
 
 ✅ **ACHIEVE**
@@ -229,7 +229,7 @@ Each day has 4 sections:
     messages.push({ role: 'user', content: userInput });
     
     const response = await ollama.chat({
-      model: 'llama3.3',
+      model: 'llama3.2',
       messages: messages,  // ← entire history goes to the AI every time
     });
     
@@ -265,7 +265,7 @@ Each day has 4 sections:
 📖 **LEARN (45 min)**
 - Read: [Ollama API docs — streaming](https://github.com/ollama/ollama/blob/main/docs/api.md) (15 min)
 - Read: [Ollama model library](https://ollama.com/library) — browse available models (15 min)
-- Pull a second model: `ollama pull qwen2.5:7b` (smaller, faster)
+- Pull a second model: `ollama pull qwen2.5:3b` (smaller, faster)
 
 🔨 **BUILD (2.5 hours)**
 - Add streaming to your CLI:
@@ -276,7 +276,7 @@ Each day has 4 sections:
     onToken: (token: string) => void
   ): Promise<string> {
     const stream = await ollama.chat({
-      model: 'llama3.3',
+      model: 'llama3.2',
       messages,
       stream: true,  // ← enables streaming
     });
@@ -292,8 +292,8 @@ Each day has 4 sections:
   ```
 - Update CLI to use streaming (words appear one by one — much better UX!)
 - Add model switching — try asking the same question to different models:
-  - `llama3.3` — general purpose, high quality
-  - `qwen2.5:7b` — faster, lighter
+  - `llama3.2` — general purpose, high quality
+  - `qwen2.5:3b` — faster, lighter
   - Notice speed vs quality trade-off
 - Create `packages/agent/src/llm/types.ts` with shared types:
   ```typescript
@@ -433,7 +433,7 @@ If everything works → celebrate! You just built your first AI app. 🎉
     // THE AGENT LOOP — keep going until AI gives a text response
     while (true) {
       const response = await ollama.chat({
-        model: 'llama3.3',
+        model: 'llama3.2',
         messages,
         tools,
       });
@@ -1376,7 +1376,7 @@ What you should have:
   import ollama
   
   response = ollama.chat(
-      model='llama3.3',
+      model='llama3.2',
       messages=[{'role': 'user', 'content': 'Hi from Python!'}]
   )
   print(response['message']['content'])
@@ -1422,7 +1422,7 @@ What you should have:
   async def chat(req: ChatRequest) -> ChatResponse:
       import ollama
       response = ollama.chat(
-          model='llama3.3',
+          model='llama3.2',
           messages=[{'role': 'user', 'content': req.message}]
       )
       return ChatResponse(reply=response['message']['content'])
@@ -1475,7 +1475,7 @@ What you should have:
         "reasoning": "brief explanation"
       }}"""
       
-      response = ollama.chat(model='llama3.3', messages=[{'role': 'user', 'content': prompt}])
+      response = ollama.chat(model='llama3.2', messages=[{'role': 'user', 'content': prompt}])
       result = json.loads(response['message']['content'])
       return EvalResult(**result)
   ```
@@ -1702,7 +1702,7 @@ What you should have:
     ollama-models:
   ```
 - Run: `docker compose up`
-- Pull model inside Ollama container: `docker exec -it lunar-ollama-1 ollama pull llama3.3`
+- Pull model inside Ollama container: `docker exec -it lunar-ollama-1 ollama pull llama3.2`
 - Test: everything should work together!
 
 ✅ **ACHIEVE**

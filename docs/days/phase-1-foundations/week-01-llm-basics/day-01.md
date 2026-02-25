@@ -254,8 +254,8 @@ ollama --version
 
 ```bash
 # Main chat model — this is your AI brain
-ollama pull llama3.3
-# ↳ Downloads ~4GB, a very capable open-source model
+ollama pull llama3.2
+# ↳ Downloads ~2GB, runs great on 8GB RAM (3B parameters)
 
 # Embedding model — converts text to searchable numbers (we use this Week 3)
 ollama pull nomic-embed-text
@@ -266,15 +266,15 @@ ollama pull nomic-embed-text
 
 ```bash
 # Start a conversation:
-ollama run llama3.3 "What is the capital of Vietnam?"
+ollama run llama3.2 "What is the capital of Vietnam?"
 # Expected: "The capital of Vietnam is Hanoi."
 
 # Try a harder question:
-ollama run llama3.3 "Explain recursion like I'm 5 years old"
+ollama run llama3.2 "Explain recursion like I'm 5 years old"
 # Expected: A simple, clear explanation
 
 # Try code generation:
-ollama run llama3.3 "Write a TypeScript function that reverses a string"
+ollama run llama3.2 "Write a TypeScript function that reverses a string"
 # Expected: A working TypeScript function
 ```
 
@@ -380,7 +380,7 @@ If you see "Lunar v0.1.0 — Ready!" → everything works! 🎉
 ## ✅ CHECKLIST — Verify Before Moving to Day 2
 
 - [ ] `ollama --version` shows a version number
-- [ ] `ollama run llama3.3 "Hello"` gives an intelligent response
+- [ ] `ollama run llama3.2 "Hello"` gives an intelligent response
 - [ ] Lunar monorepo structure exists (`packages/agent`, `packages/shared`, etc.)
 - [ ] `npx tsx packages/shared/src/index.ts` prints "Lunar v0.1.0 — Ready!"
 - [ ] You can explain in your own words: "An LLM is ___"
