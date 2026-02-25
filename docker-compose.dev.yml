@@ -1,0 +1,56 @@
+# Development Docker Compose
+# Usage: docker compose -f docker-compose.dev.yml up
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: lunar-ollama-dev
+    ports:
+      - "11434:11434"        # exposed for direct testing
+    volumes:
+      - ollama-data:/root/.ollama
+
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: deps           # stop at deps stage (has all deps)
+    container_name: lunar-gateway-dev
+    ports:
+      - "3100:3100"
+      - "9229:9229"          # Node.js debugger port!
+    environment:
+      - LUNAR_PORT=3100
+      - OLLAMA_URL=http://ollama:11434
+      - EVAL_URL=http://eval:8000
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+    volumes:
+      # Bind mount source code for live reload
+      - ./packages:/app/packages
+      - ./tsconfig.json:/app/tsconfig.json
+    # Override command to use tsx watch (live reload)
+    command: >
+      sh -c "
+        corepack enable &&
+        npx tsx watch --inspect=0.0.0.0:9229 packages/gateway/src/index.ts
+      "
+    depends_on:
+      - ollama
+
+  eval:
+    build:
+      context: ./services/eval
+    container_name: lunar-eval-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+    volumes:
+      - ./services/eval:/app   # live reload
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    depends_on:
+      - ollama
+
+volumes:
+  ollama-data:
