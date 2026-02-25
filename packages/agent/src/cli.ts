@@ -1,151 +1,159 @@
 /**
  * CLI Chat — talk to Lunar in your terminal
  *
- * This is a simple REPL (Read-Eval-Print Loop) with slash commands.
+ * Day 4 upgrade: full conversation HISTORY.
+ * The messages array grows with every turn — the AI reads
+ * the ENTIRE array on each request, so it "remembers" everything.
  *
  * How it works:
- *   1. Show prompt "You: "
- *   2. If input starts with / → handle as command
- *   3. Otherwise → send to AI
- *   4. Print AI's response
- *   5. Go back to step 1
+ *   1. User types something
+ *   2. Push user message → messages array
+ *   3. Send ENTIRE messages array to Ollama
+ *   4. Push AI reply → messages array
+ *   5. Print reply, repeat
  */
 import * as readline from 'readline';
-import { chat, CODE_CONFIG, CREATIVE_CONFIG, FACTUAL_CONFIG } from './llm/client.js';
-import type { LLMConfig } from './llm/client.js';
+import { ollama } from './llm/client.js';
+import type { Message } from './llm/types.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-// Current configuration (can be changed at runtime via slash commands)
-let currentConfig: Partial<LLMConfig> = {};
-let currentSystemPrompt = 'You are Lunar, a helpful personal assistant. Be concise.';
+// ══════════════════════════════════════════════
+//  The conversation history — THIS IS THE KEY!
+//  Every new message gets pushed to this array.
+//  Every API call sends the ENTIRE array.
+// ══════════════════════════════════════════════
+const messages: Message[] = [
+  {
+    role: 'system',
+    content: `You are Lunar, a helpful personal AI assistant.
+Be concise and friendly. If you don't know something, say so honestly.
+When asked to code, use TypeScript.`,
+  },
+];
+
+// Runtime config
+let model = 'llama3.2';
+let temperature = 0.7;
 
 /**
- * Handle slash commands like /temp, /model, /preset
+ * Send the full conversation to the AI and get a response.
+ * The AI reads ALL messages from the beginning every time.
+ */
+async function chat(userInput: string): Promise<string> {
+  // Step 1: Add user's message to history
+  messages.push({ role: 'user', content: userInput });
+
+  // Step 2: Send ENTIRE history to AI
+  const response = await ollama.chat({
+    model,
+    messages,        // ← the whole conversation, every time
+    options: { temperature },
+  });
+
+  // Step 3: Add AI's response to history (so next turn it "remembers" this too)
+  const reply = response.message.content;
+  messages.push({ role: 'assistant', content: reply });
+
+  return reply;
+}
+
+/**
+ * Handle slash commands.
  * Returns true if the input was a command, false if it's a regular message.
  */
 function handleCommand(input: string): boolean {
-  const parts = input.split(' ');
-  const command = parts[0].toLowerCase();
+  const parts = input.trim().split(' ');
+  const cmd = parts[0].toLowerCase();
 
-  switch (command) {
-    case '/temp':
-    case '/temperature': {
-      const temp = parseFloat(parts[1]);
-      if (isNaN(temp) || temp < 0 || temp > 2) {
-        console.log('Usage: /temp <0-2>  (e.g., /temp 0.7)\n');
+  switch (cmd) {
+    case '/temp': {
+      const t = parseFloat(parts[1]);
+      if (isNaN(t) || t < 0 || t > 2) {
+        console.log('Usage: /temp <0-2>  e.g. /temp 0.3\n');
         return true;
       }
-      currentConfig.temperature = temp;
-      console.log(`✅ Temperature set to ${temp}\n`);
+      temperature = t;
+      console.log(`✅ Temperature: ${t}\n`);
       return true;
     }
 
     case '/model': {
-      const model = parts[1];
-      if (!model) {
-        console.log('Usage: /model <name>  (e.g., /model qwen2.5:3b)\n');
-        return true;
-      }
-      currentConfig.model = model;
-      console.log(`✅ Model switched to ${model}\n`);
+      if (!parts[1]) { console.log('Usage: /model <name>  e.g. /model qwen2.5:3b\n'); return true; }
+      model = parts[1];
+      console.log(`✅ Model: ${model}\n`);
       return true;
     }
 
-    case '/preset': {
-      const preset = parts[1]?.toLowerCase();
-      switch (preset) {
-        case 'code':
-          currentConfig = { ...CODE_CONFIG };
-          console.log('✅ Preset: CODE (temp=0.1, precise)\n');
-          break;
-        case 'creative':
-          currentConfig = { ...CREATIVE_CONFIG };
-          console.log('✅ Preset: CREATIVE (temp=1.0, varied)\n');
-          break;
-        case 'factual':
-          currentConfig = { ...FACTUAL_CONFIG };
-          console.log('✅ Preset: FACTUAL (temp=0, deterministic)\n');
-          break;
-        default:
-          console.log('Usage: /preset <code|creative|factual>\n');
-      }
+    case '/history': {
+      // Count words across all messages as a rough token estimate (1 word ≈ 1.3 tokens)
+      const wordCount = messages.reduce((sum, m) => sum + m.content.split(/\s+/).length, 0);
+      const estTokens = Math.round(wordCount * 1.3);
+      console.log(`\n📜 Conversation: ${messages.length} messages`);
+      console.log(`   Estimated tokens: ~${estTokens} / 128,000\n`);
+      return true;
+    }
+
+    case '/clear': {
+      // Keep only the system prompt at index 0
+      messages.splice(1);
+      console.log('🗑️  Conversation cleared (system prompt kept)\n');
       return true;
     }
 
     case '/system': {
-      const newPrompt = parts.slice(1).join(' ');
-      if (!newPrompt) {
-        console.log(`Current system prompt: "${currentSystemPrompt}"\n`);
+      const prompt = parts.slice(1).join(' ');
+      if (!prompt) {
+        console.log(`📋 System prompt: "${messages[0].content}"\n`);
         return true;
       }
-      currentSystemPrompt = newPrompt;
+      messages[0] = { role: 'system', content: prompt };
       console.log('✅ System prompt updated\n');
-      return true;
-    }
-
-    case '/config': {
-      const effective = { model: 'llama3.2', temperature: 0.7, maxTokens: 2048, ...currentConfig };
-      console.log('Current config:', effective);
-      console.log(`System prompt: "${currentSystemPrompt}"\n`);
       return true;
     }
 
     case '/help': {
       console.log(`
-Available commands:
-  /temp <0-2>                      Set temperature (0=precise, 1=creative)
-  /model <name>                    Switch AI model (e.g., qwen2.5:3b)
-  /preset <code|creative|factual>  Use preconfigured settings
-  /system <prompt>                 Change system prompt
-  /config                          Show current settings
-  /help                            Show this help
-  exit                             Quit
+Commands:
+  /temp <0-2>       Set temperature (0=precise, 1=creative)
+  /model <name>     Switch model  (e.g. qwen2.5:3b)
+  /history          Show conversation size + estimated tokens
+  /clear            Clear history (keeps system prompt)
+  /system [text]    View or set system prompt
+  /help             Show this help
+  exit              Quit
 `);
       return true;
     }
 
     default:
-      return false; // not a command — treat as regular message
+      return false;
   }
 }
 
 function askQuestion(): void {
   rl.question('You: ', async (input: string) => {
-    if (input.toLowerCase() === 'exit' || input.toLowerCase() === 'quit') {
-      console.log('Goodbye! 👋');
-      rl.close();
-      return;
-    }
-
     if (!input.trim()) { askQuestion(); return; }
-
-    // Check if it's a slash command
-    if (input.startsWith('/')) {
-      handleCommand(input);
-      askQuestion();
-      return;
-    }
+    if (input.toLowerCase() === 'exit') { console.log('👋 Goodbye!'); rl.close(); return; }
+    if (input.startsWith('/')) { handleCommand(input); askQuestion(); return; }
 
     try {
-      console.log('Lunar is thinking...');
-      const answer = await chat(input, currentSystemPrompt, currentConfig);
-      console.log(`\nLunar: ${answer}\n`);
-    } catch (error: any) {
-      console.error(`\n❌ Error: ${error.message}\n`);
+      const reply = await chat(input);
+      console.log(`\nLunar: ${reply}\n`);
+    } catch (err: any) {
+      console.error(`❌ ${err.message}\n`);
     }
 
     askQuestion();
   });
 }
 
-// Start
 console.log('╔════════════════════════════════════╗');
 console.log('║  🌙 Lunar AI — Personal Assistant  ║');
-console.log('║  Type /help for commands           ║');
+console.log('║  Now with conversation memory!     ║');
 console.log('╚════════════════════════════════════╝\n');
 
 askQuestion();
