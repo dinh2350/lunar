@@ -8,6 +8,9 @@ lunar.yourdomain.com {
     
     # Health check
     reverse_proxy /health gateway:3100
+
+    # Control panel UI
+    reverse_proxy /* ui:3000
     
     # Security headers
     header {

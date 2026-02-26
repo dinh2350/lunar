@@ -84,6 +84,23 @@ services:
       - /tmp
     restart: unless-stopped
 
+  ui:
+    build:
+      context: ./apps/control
+      dockerfile: Dockerfile
+    container_name: lunar-ui
+    environment:
+      - NEXT_PUBLIC_API_URL=http://gateway:3100
+    networks:
+      - frontend
+    depends_on:
+      - gateway
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
 volumes:
   ollama-data:
   lunar-data:
