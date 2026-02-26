@@ -13,18 +13,25 @@ echo "🌙 Lunar Backup — ${DATE}"
 # Create backup directory
 mkdir -p "${BACKUP_DIR}"
 
-# Backup critical data
+# 1. SQLite safe backup (uses .backup command for consistency)
+DB_FILE="${DATA_DIR}/lunar.db"
+if [ -f "$DB_FILE" ]; then
+  echo "  🗄️  SQLite safe backup..."
+  sqlite3 "$DB_FILE" ".backup ${DATA_DIR}/lunar_backup.db" 2>/dev/null || true
+fi
+
+# 2. Archive data + config
 echo "  📦 Backing up data..."
 tar czf "${BACKUP_FILE}" \
   -C / \
   "${DATA_DIR#/}" \
   2>/dev/null || true
 
-# Show backup size
+# 3. Show backup size
 SIZE=$(du -sh "${BACKUP_FILE}" | cut -f1)
 echo "  💾 Backup: ${BACKUP_FILE} (${SIZE})"
 
-# Rotate old backups (delete older than KEEP_DAYS)
+# 4. Rotate old backups (delete older than KEEP_DAYS)
 echo "  🗑️  Cleaning backups older than ${KEEP_DAYS} days..."
 find "${BACKUP_DIR}" -name "lunar-backup-*.tar.gz" -mtime "+${KEEP_DAYS}" -delete
 
