@@ -9,7 +9,11 @@
     "typecheck": "tsc --noEmit",
     "eval": "./scripts/eval.sh",
     "eval:quick": "cd services/eval && python runner.py",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ci": "vitest run --coverage",
+    "ci": "pnpm typecheck && pnpm test:ci"
   },
   "keywords": [],
   "author": "",
